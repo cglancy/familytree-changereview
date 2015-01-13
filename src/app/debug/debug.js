@@ -11,9 +11,7 @@
     })
     .controller('DebugController', function ($scope, fsCurrentUserCache, fsApi) {
 
-      var maxAhnen = 8;
-
-      function createParents(childId, ahnen) {
+      function createParents(childId, ahnen, maxAhnen) {
 
         if (ahnen > maxAhnen) {
           return;
@@ -44,8 +42,8 @@
               var couple = new fsApi.Couple({husband: fatherId, wife: motherId});
               couple.$save('Created for testing').then(function() {
 
-                createParents(fatherId, fatherAhnen);
-                createParents(motherId, motherAhnen);
+                createParents(fatherId, fatherAhnen, maxAhnen);
+                createParents(motherId, motherAhnen, maxAhnen);
               });
             });
           });
@@ -53,12 +51,14 @@
 
       }
 
-      $scope.createAncestry = function() {
+      $scope.createAncestry = function(generations) {
 
-        console.log('create Ancestry');
+        console.log('create ancestry for ' + generations + ' generations.');
+
+        var maxAhnen = Math.pow(2, generations) - 1;
 
         fsCurrentUserCache.getUser().then(function(user) {
-            createParents(user.personId, 1);
+            createParents(user.personId, 1, maxAhnen);
         });
       };
 
