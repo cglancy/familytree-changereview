@@ -1,0 +1,202 @@
+<div class="modal-header">
+    <div class="profileHeaderContainer editCoupleContainer">
+        <div class="editCoupleJumbotron">
+            <div class="panel-heading">
+                <!-- Still working on the CSS here. Just populate it as is -->
+                <div class="row">
+                    <div class="col-lg-12">
+                        <table ng-if="!!person">
+                            <tr>
+                                <td class="individualColumn">
+
+                                    <div class="person-info-container">
+                                        <div class="person-gender-container medium">
+                                            <div class="person-gender-icon" ng-class="{'fs-icon-medium-male': person._isMale(), 'fs-icon-medium-female': !person._isMale()}"></div>
+                                        </div>
+                                        <div class="person-info">
+                                            <small>Person</small>
+                                            <br/>
+
+                                            <div class="person-name">{{person.$getDisplayName()}}</div>
+                                            <span class="person-id">{{person.id}}</span>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td class="parentsColumn">
+                                    <small>Parents</small>
+                                    <div class="parents-container">
+                                        <div ng-show="!!personFather" class="person-info-container couple-husband">
+                                            <div class="person-gender-container small">
+                                                <div class="person-gender-icon fs-icon-small-male"></div>
+                                            </div>
+                                            <div class="person-info">
+                                                <div class="person-name">{{personFather.$getDisplayName()}}</div>
+                                            </div>
+                                        </div>
+                                        <div ng-show="!!personMother" class="person-info-container couple-wife">
+                                            <div class="person-gender-container small">
+                                                <div class="person-gender-icon fs-icon-small-female"></div>
+                                            </div>
+                                            <div class="person-info">
+                                                <div class="person-name">{{personMother.$getDisplayName()}}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="spouseColumn">
+                                    <small>Spouse</small>
+                                    <div class="spouse-container">
+                                        <div ng-show="!!personSpouse" class="person-info-container">
+                                            <div class="person-gender-container small">
+                                                <div class="person-gender-icon fs-icon-small-male"></div>
+                                            </div>
+                                            <div class="person-info">
+                                                <div class="person-name">{{personSpouse.$getDisplayName()}}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+
+
+                      <table ng-if="!!couple">
+                        <tr>
+                          <td class="individualColumn">
+                            <div class="person-info-container">
+                              <div class="person-info">
+                                <i class="icon-rounded fs-icon-male" style="float: left">&nbsp;</i>
+                                <div class="person-name">{{husband.$getDisplayName()}}</div>
+                                <span class="birth">{{husband.$getDisplayLifeSpan()}}</span></div>
+                            </div>
+                          </td>
+                          <td class="spouseColumn">
+                            <small>Spouse</small>
+                            <div class="spouse-container">
+                              <div class="person-info-container">
+                                <div class="person-info">
+                                  <i class="icon-rounded fs-icon-female" style="float: left">&nbsp;</i>
+                                  <div class="person-name">{{wife.$getDisplayName()}}</div>
+                                  <span class="birth">{{wife.$getDisplayLifeSpan()}}</span></div>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      </table>
+
+                      <table ng-if="!!parents">
+                        <tr>
+                          <td class="individualColumn">
+                            <div class="person-info-container">
+                              <div class="person-info">
+                                <i class="icon-rounded" ng-class="{'fs-icon-male': child._isMale(), 'fs-icon-female': !child._isMale()}" style="float: left">&nbsp;</i>
+                                <div class="person-name">{{child.$getDisplayName()}}</div>
+                                <span class="birth">{{child.$getDisplayLifeSpan()}}</span></div>
+                            </div>
+                          </td>
+                          <td class="parentsColumn">
+                            <small>Parents</small>
+                            <div class="parents-container">
+                              <div class="person-info-container couple-husband">
+                                <div class="person-info">
+                                  <i class="icon-rounded fs-icon-male" style="float: left">&nbsp;</i>
+                                  <div class="person-name">{{father.$getDisplayName()}}</div>
+                                  <span class="birth">{{father.$getDisplayLifeSpan()}}</span></div>
+                              </div>
+                            </div>
+                            <div class="person-info-container couple-wife">
+                              <div class="person-info">
+                                <i class="icon-rounded fs-icon-female" style="float: left">&nbsp;</i>
+                                <div class="person-name">{{mother.$getDisplayName()}}</div>
+                                <span class="birth">{{mother.$getDisplayLifeSpan()}}</span></div>
+                            </div>
+                          </td>
+                        </tr>
+                      </table>
+                    </div>
+
+                </div>
+
+
+                <div class="clearboth">
+                    &nbsp;
+                </div>
+            </div>
+
+            <div class="clearboth"></div>
+        </div>
+    </div>
+</div>
+<div class="modal-body">
+    <div class="panel panel-primary family-panel">
+        <div class="panel-heading">
+            <h4>Delete <span ng-show="!!person">Person</span><span ng-hide="!!person">Relationship</span></h4>
+
+            <p ng-show="!!person">It is recommended that you delete people only if you added a person by mistake or
+                if the person never existed. You should consider using Merge if this person is a duplicate or Delete
+                Relationship if this person is in the wrong family.</p>
+
+            <p ng-show="!!person" ng-person="!!person">It is recommended that you delete relationships only when you are
+                confident the
+                relationship never existed or when the relationship is a duplicate.</p>
+        </div>
+        <div class="panel-body ">
+            <div class="alert alert-warning" ng-show="!!person">
+                <i class="fa fa-exclamation-triangle pull-left"></i>Review this person's couple and parent-child
+                relationships to determine if the relationships need to be deleted instead of the person.
+            </div>
+            <ul ng-show="!!person">
+                <li class="none"><span class="badge">{{couplesCount}}</span> Couple Relationships</li>
+                <li><span class="badge">{{parentsCount}}</span>Parent-Child Relationships</li>
+            </ul>
+            <div class="alert alert-warning">
+                <i class="fa fa-exclamation-triangle pull-left"></i>
+                <span ng-show="!!person">By deleting this person, you will possibly delete attached sources, active discussions, and notes.</span>
+                <span ng-hide="!!person">By deleting this relationship, you will also delete the following information.</span>
+            </div>
+            <ul>
+                <li><span class="badge">{{sourcesCount}}</span> Attached Sources</li>
+                <li ng-if="!!person"><span class="badge">{{discussionsCount}}</span> Active Discussions</li>
+            </ul>
+            <div class="alert alert-warning">
+                <i class="fa fa-exclamation-triangle pull-left"></i>Before deleting this <span
+                    ng-show="!!person">person</span><span
+                    ng-hide="!!person">relationship</span>, provide a reason statement, and check the boxes
+                below.<br/>
+
+                <form role="form">
+                    <div class="form-group">
+                        <textarea class="form-control" ng-model="changeMessage" rows="3" name="justification"
+                                  id="deleteJustification"
+                                  placeholder="Explain how you know this person should be deleted."
+                                  required="required"></textarea>
+                    </div>
+
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkbox" ng-model="reviewCheckbox"> <span ng-show="!!person">I have reviewed the couple and parent-child relationships for this person.</span><span
+                                ng-hide="!!person">I have reviewed the other relationships for these individuals.</span>
+                        </label>
+                    </div>
+
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkbox" ng-model="reasonCheckbox"> I have included a reason statement why I
+                            feel this <span ng-show="!!person">person</span><span
+                                ng-hide="!!person">relationship</span> should be deleted.
+                        </label>
+                    </div>
+                    <!-- DISABLED UNTIL A JUSTIFICATION IS PROVIDED -->
+
+                    <button type="button" ng-disabled="!reviewCheckbox || !reasonCheckbox"ng-click="ok(changeMessage)"
+                            class="btn btn-warning">Delete
+                      <span ng-show="!!person">Person</span>
+                      <span ng-hide="!!person">Relationship</span>
+                    </button>
+                    <button type="button" ng-click="cancel()" class="btn btn-link">Cancel</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,201 @@
+<div fs-tree-popover show-on-hover=".all-husbands-wrapper,.all-wives-wrapper,.joint-kids-wrapper,.all-husbands-wrapper,.all-wives-wrapper">
+    <div class="pull-left all-family-wrapper">
+
+        <div class="pull-right sans-serif next-gen-kids">
+            <div ng-show="false" class="pull-left hover-label" >
+                Expand Tree
+            </div>
+            <div class="pull-left">
+                <span ng-show="false" class="fs-icon-arrow-left next-gen-kids-arrow"></span>
+            </div>
+            <div class="clearboth">&nbsp;</div>
+        </div>
+
+
+
+
+        <!-- Alternate husbands -->
+        <div ng-show="family.hasAlternateHusbands()" ng-class="{'containerOpen':getClickState()==='husbands'}" class="all-husbands-wrapper alternativeFamily alternativeHusbands">
+            <div class="alternativeFamilyContainer">
+                <div class="arrow" >
+                    <div ng-click="toggleClickState('husbands')" class="pull-right">
+                        <span class="fs-icon-arrow-left"></span>
+                    </div>
+                    <div class="clearfloat">&nbsp;</div>
+                </div>
+                <div class="text-right familyLabel">
+                    <p>All Husbands</p>
+                </div>
+                <div class="familyList" ng-show="getClickState()==='husbands'">
+                    <ul>
+                        <li ng-repeat="person in family.alternateHusbands()"  ng-class="{'selected':$first}">
+                            <div ng-class="{'fs-icon-small-female icon-rounded':getClickState()!=='husbands','fs-icon-small-male':getClickState()==='husbands'}" class="person-gender-icon icon-rounded">&nbsp;</div><a class-fs-person-popover popover-placement="auto top" person="person">{{person.$getPreferredName().$getFullText()}}</a>
+                        </li>
+                        <li ng-show="family.hasChildrenWithUnknownFather()" class="divider"><hr></li>
+                        <li ng-show="family.hasChildrenWithUnknownFather()"><a ng-href="{{family.hrefForUnknownFather()}}">Children with Unknown Father</a></li>
+                    </ul>
+                    <div class="clearfix">&nbsp;</div>
+                </div>
+            </div>
+            <div class="clearfix">&nbsp;</div>
+        </div>
+
+
+        <!-- Alternate wives -->
+        <div ng-show="family.hasAlternateWives()" ng-class="{'containerOpen':getClickState()==='wives'}" class="all-wives-wrapper alternativeFamily alternativeWives">
+            <div class="alternativeFamilyContainer">
+                <div class="arrow" >
+                    <div ng-click="toggleClickState('wives')" class="pull-right">
+                        <span class="fs-icon-arrow-left"></span>
+                    </div>
+
+                </div>
+                <div class="text-right familyLabel">
+                    <p>All Wives</p>
+                </div>
+                <div class="familyList" ng-show="getClickState()==='wives'">
+                    <ul>
+                        <li ng-repeat="person in family.alternateWives()"  ng-class="{'selected':$first}">
+                            <div ng-class="{'fs-icon-small-female icon-rounded':getClickState()==='wives','fs-icon-small-male':getClickState()==='husbands'}" class="person-gender-icon icon-rounded">&nbsp;</div><a class-fs-person-popover popover-placement="auto top" person="person">{{person.$getPreferredName().$getFullText()}}</a>
+                        </li>
+                        <li ng-show="family.hasChildrenWithUnknownMother()" class="divider"><hr></li>
+                        <li ng-show="family.hasChildrenWithUnknownMother()"><a ng-href="{{family.hrefForUnknownMother()}}">Children with Unknown Mother</a></li>
+                    </ul>
+                    <div class="clearfix">&nbsp;</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="pull-left" ng-mouseenter="initHoverData()">
+        <div class="pull-left couple-card">
+            <div>
+                <div class="pull-left">
+                    <div class="pull-left fs-icon-male couple-icon couple-icon-male" style="margin-right:8px">&nbsp;</div>
+                </div>
+                <div class="pull-left " ng-show="family && !family.isUseless()">
+                    <a ng-show="!family.hasHusband()" ng-href="{{findAddHref}}" class="name-line">Add Husband</a>
+                    <a fs-person-popover popover-placement="auto top" person="family.getHusband()" ng-show="family.hasHusband()" href=""
+                       class="name-line">{{family.getHusbandName()}}</a>
+                    <br>
+
+                    <div class="pedigree-lifeSpan pull-left">{{lifespanText(family.getHusband())}}</div>
+                    <div class="pull-left dot-guy">&nbsp;</div>
+                    <div class="pull-left pedigree-pid">{{family.getHusband().id}}</div>
+                    <div class="clearboth">&nbsp;</div>
+                </div>
+
+                <div class="clearboth">&nbsp;</div>
+            </div>
+            <div>
+                <div class="pull-left">
+                    <div class="pull-left fs-icon-female couple-icon couple-icon-female" style="margin-right:8px">&nbsp;</div>
+                </div>
+                <div class="pull-left " ng-show="family && !family.isUseless()">
+                    <a ng-show="!family.hasWife()" ng-href="{{findAddHref}}" class="name-line">Add Wife</a>
+                    <a fs-person-popover popover-placement="auto top" person="family.getWife()" ng-show="family.hasWife()" href=""
+                       class="name-line" style="white-space: nowrap;display:inline">{{family.getWifeName()}}</a>
+                    <br>
+
+                    <div class="pedigree-lifeSpan pull-left">{{lifespanText(family.getWife())}}</div>
+                    <div class="pull-left dot-guy">&nbsp;</div>
+                    <div class="pull-left pedigree-pid">{{family.getWife().id}}</div>
+                    <div class="clearboth">&nbsp;</div>
+                </div>
+
+                <div class="clearboth">&nbsp;</div>
+            </div>
+        </div>
+
+        <div class="clearboth">&nbsp;</div>
+
+
+        <!--Children-->
+        <div ng-show="family.hasChildren()" ng-class="{'containerOpen':getClickState()==='kids'}" class="alternativeFamily alternativeChildren">
+            <div class="alternativeFamilyContainer">
+                <div class="arrow" >
+                    <div ng-click="toggleClickState('kids')">
+                        <div class="fs-icon-arrow-down"></div>
+                    </div>
+                </div>
+                <div class="familyLabel">
+                    <p>Children</p>
+                </div>
+                <div class="familyList" ng-show="getClickState()==='kids'">
+                    <ul>
+                        <li ng-repeat="person in family.children()">
+                            <div ng-class="{'fs-icon-small-female icon-rounded':!person._isMale(),'fs-icon-small-male':person._isMale()}" class="person-gender-icon icon-rounded">&nbsp;</div>
+                            <a fs-person-popover popover-placement="auto top" person="person" style="white-space: nowrap; ">{{person.$getPreferredName().$getFullText()}}</a>
+                        </li>
+                    </ul>
+                    <div class="clearfix">&nbsp;</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+    <div class="pull-left all-family-wrapper">
+
+
+        <!--Alternate parents of the husband-->
+        <div ng-show="family.hasAlternatePaternalParents()" ng-class="{'containerOpen':getClickState()==='altPatParents'}" class="all-husbands-wrapper alternativeFamily alternativePaternalParents">
+            <div class="alternativeFamilyContainer">
+                <div class="arrow" >
+                    <div ng-click="toggleClickState('altPatParents')" class="pull-right">
+                        <span class="fs-icon-arrow-right"></span>
+                    </div>
+                </div>
+                <div class="familyLabel">
+                    <p>All Parents</p>
+                </div>
+                <div class="familyList" ng-show="getClickState()==='altPatParents'">
+                    <ul>
+                        <li ng-click="family.switchPaternalParents(parents); dismissHoverControls()" ng-repeat="parents in family.alternatePaternalParents()" ng-class="{'selected':$first}">
+                            <div class="fs-icon-small-male person-gender-icon icon-rounded">&nbsp;</div>
+                            <a href="">{{parents.father.$getPreferredName().$getFullText()}}</a><br />
+                            <div class="fs-icon-small-female icon-rounded person-gender-icon icon-rounded">&nbsp;</div>
+                            <a href="">{{parents.mother.$getPreferredName().$getFullText()}}</a>
+                        </li>
+                    </ul>
+                    <div class="clearfix">&nbsp;</div>
+                </div>
+            </div>
+        </div>
+
+
+
+        <!--Alternate parents of the wife-->
+        <div ng-show="family.hasAlternateMaternalParents()" ng-class="{'containerOpen':getClickState()==='altMatParents'}" class="all-wives-wrapper alternativeFamily alternativeMaternalParents">
+            <div class="alternativeFamilyContainer">
+                <div class="arrow" >
+                    <div ng-click="toggleClickState('altMatParents')" class="pull-right">
+                        <span class="fs-icon-arrow-right"></span>
+                    </div>
+                </div>
+                <div class="familyLabel">
+                    <p>All Parents</p>
+                </div>
+                <div class="familyList" ng-show="getClickState()==='altMatParents'">
+                    <ul>
+                        <li ng-click="family.switchMaternalParents(parents); dismissHoverControls()" ng-repeat="parents in family.alternateMaternalParents()" ng-class="{'selected':$first}">
+                            <div class="fs-icon-small-male person-gender-icon icon-rounded">&nbsp;</div>
+                            <a href="">{{parents.father.$getPreferredName().$getFullText()}}</a><br />
+                            <div class="fs-icon-small-female icon-rounded person-gender-icon icon-rounded">&nbsp;</div>
+                            <a href="">{{parents.mother.$getPreferredName().$getFullText()}}</a>
+                        </li>
+                    </ul>
+                    <div class="clearfix">&nbsp;</div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+
+    <div ng-show="brackets==='under'" style="height: 248px; width:35px; border:solid 1px #787068; border-right:none; position:absolute; top:-77px; left:450px; z-index: 1">
+        &nbsp;
+    </div>
+</div>

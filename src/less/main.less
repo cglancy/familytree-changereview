@@ -1,0 +1,29 @@
+/**
+ * This is the main application stylesheet. It should include or import all
+ * stylesheets used throughout the application as this is the only stylesheet in
+ * the Grunt configuration that is automatically processed.
+ */
+
+
+@import 'variables.less';
+
+/**
+ * Now that all app-wide styles have been applied, we can load the styles for
+ * all the submodules and components we are using. 
+ *
+ * In a later version of this boilerplate, I'd like to automate this.
+ */
+
+// dovy.less contains customizations Dovy has made to bootstrap
+// TODO these should be refactored into different files
+@import 'dovy.less';
+
+// style imports the other less files
+@import 'style.less';
+// TODO eventually we need to move styles from style.less into view or directive-specific files
+@import '../app/person/person.less';
+@import '../common/fsReferenceClientShared/fsReferenceClientShared.less';
+
+
+// familysearch contains styles to make the pages look similar to FamilySearch
+@import 'familysearch.less';

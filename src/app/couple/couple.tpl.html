@@ -1,0 +1,28 @@
+<div class="profileHeaderContainer editCoupleContainer">
+  <div class="editCoupleJumbotron">
+    <div class="panel-heading">
+      <div class="navigation">
+        <div>
+          Go to: <a ng-href="/#/person/{{husband.id}}">{{husband.$getDisplayName()}}</a>
+          | <a ng-href="/#/person/{{wife.id}}">{{wife.$getDisplayName()}}</a>
+        </div>
+      </div>
+      <div fs-couple-profile couple="couple" husband="husband" wife="wife"></div>
+    </div>
+  </div>
+  <div class="clearboth"></div>
+</div>
+<div class="mainContent">
+  <div class="row">
+    <div class="col-md-9">
+      <div fs-couple-section couple="couple" husband="husband" wife="wife" state="states['couple']"></div>
+      <div fs-couple-events-section couple="couple" state="states['coupleEvents']"></div>
+      <div fs-sources-section couple="couple" husband="husband" wife="wife" sources="sources" state="states['sources']"></div>
+      <div fs-notes-section couple="couple" state="states['notes']"></div>
+    </div>
+    <div class="col-md-3 sidebar">
+      <div fs-tools-section couple="couple" husband="husband" wife="wife"></div>
+      <div fs-changes-section couple="couple" husband="husband" wife="wife"></div>
+    </div>
+  </div>
+</div>

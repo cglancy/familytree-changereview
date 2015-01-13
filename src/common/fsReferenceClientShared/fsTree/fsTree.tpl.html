@@ -1,0 +1,25 @@
+<div style="position:relative">
+    <div style="position: absolute; top:20px; left: 20px; z-index: 10000">
+        <div id="panner">
+            <div class="text-center pan-center">o</div>
+            <div class="pan-up" ng-click="move($event,0,-50)"><span class="fs-icon-arrow-up"></span></div>
+            <div class="pan-left" ng-click="move($event,-50,0)"><span class="fs-icon-arrow-left"></span></div>
+            <div class="pan-right" ng-click="move($event,50,0)"><span class="fs-icon-arrow-right"></span></div>
+            <div class="pan-down" ng-click="move($event,0,50)"><span class="fs-icon-arrow-down"></span></div>
+        </div>
+
+        <div id="zoomer">
+            <div ng-click="model.zoomIn()" class="pull-left" style="cursor:pointer; margin-right:15px">+</div>
+            <div ng-click="model.zoomOut()" class="pull-left" style="cursor:pointer; ">&ndash;</div>
+            <div class="clearfix" style="height:0">&nbsp;</div>
+        </div>
+
+    </div>
+
+    <panzoom config="config" model="model" style="height: 1000px; position:absolute; top:0; left:0">
+        <div fs-tree-fragment recurse="1===0+1" family="family" show-kids="true" show-root-couple="true" show-parents="true"/>
+    </panzoom>
+
+</div>
+
+

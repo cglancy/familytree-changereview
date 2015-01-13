@@ -1,0 +1,25 @@
+{
+  "name": "fsReferenceClient",
+  "version": "0.0.1",
+  "_comment": "Any dependencies added here require a manual edit to vendor_files in /Gruntfile.js",
+  "dependencies": {
+    "angular": "~1.2.16",
+    "angular-bootstrap-jbruni": "git://github.com/jbruni/bootstrap-bower-jbruni.git#~0.10.5",
+    "hamsterjs": "1.0.4",
+    "angular-mousewheel": "1.0.4",
+    "angular-ui-router": "~0.2.7",
+    "angular-pan-zoom": "git://github.com/mvindahl/angular-pan-zoom.git#19d27da89ca672afea5043d7d5a907e8e7593ef9",
+    "lodash": "~2.4.1",
+    "es5-shim": "~3.0.2",
+    "familysearch-javascript-sdk": "~0.9.15",
+    "angular-moment": "~0.7.0",
+    "ngInfiniteScroll": "~1.1.2",
+    "angular-growl-v2": "~0.6.0"
+  },
+  "devDependencies": {
+    "angular-mocks": "~1.2.9"
+  },
+  "resolutions": {
+    "angular": "~1.2.16"
+  }
+}
