@@ -3,21 +3,15 @@
   angular.module('fsReferenceClient')
     .config(function ($stateProvider) {
       $stateProvider.state('home', {
-        url: '/',
+        url: '/home',
         controller: 'HomeController',
         templateUrl: 'home/home.tpl.html',
         data: { pageTitle: 'Home' }
       });
     })
-    .controller('HomeController', function ($scope, $state, $rootScope, fsApi, fsCurrentUserCache) {
-      $scope.signIn = function() {
-        fsApi.getAccessToken().then(function() {
-          $rootScope.$emit('newSession');
+    .controller('HomeController', function ($scope, fsCurrentUserCache) {
           fsCurrentUserCache.getUser().then(function(user) {
-            $state.go('user', { userId: user.id });
+            $scope.userName = user.displayName;
           });
-        });
-      };
-
     });
 })();
