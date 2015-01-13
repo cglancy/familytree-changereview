@@ -1,0 +1,17 @@
+<p>Logged in as {{userName}}</p>
+<h3>Settings</h3>
+Number of generations: <input type="text" ng-model="generations"></input>
+<button class="btn btn-large btn-primary" type="submit"ng-click="getTree(generations)">Find My Tree</button>
+
+<table class="table table-striped">
+  <thead>
+  	<tr>
+    	<th>Name</th>
+    	<th>ID</th>
+  	</tr>
+  </thead>
+  <tr ng-repeat="p in persons">
+    <td>{{ p.display.name }}</td>
+    <td>{{ p.id }}</td>
+  </tr>
+</table>
