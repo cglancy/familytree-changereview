@@ -2,6 +2,7 @@
   'use strict';
   angular.module('fsReferenceClient', [
     'fsReferenceClientShared',
+    'firebase',
     'templates-app',
     'templates-common',
     'ui.bootstrap',

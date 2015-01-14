@@ -14,7 +14,9 @@
     "familysearch-javascript-sdk": "~0.9.15",
     "angular-moment": "~0.7.0",
     "ngInfiniteScroll": "~1.1.2",
-    "angular-growl-v2": "~0.6.0"
+    "angular-growl-v2": "~0.6.0",
+    "firebase": "~2.1.1",
+    "angularfire": "~0.9.1"
   },
   "devDependencies": {
     "angular-mocks": "~1.2.9"

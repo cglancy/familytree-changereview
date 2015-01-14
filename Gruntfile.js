@@ -97,7 +97,9 @@ module.exports = function(grunt) {
                 'vendor/angular-mousewheel/mousewheel.js',
                 'vendor/angular-pan-zoom/build/panzoom.0.1-snapshot.min.js',
                 'vendor/ngInfiniteScroll/build/ng-infinite-scroll.js',
-                'vendor/angular-growl-v2/build/angular-growl.js'
+                'vendor/angular-growl-v2/build/angular-growl.js',
+                'vendor/firebase/firebase.js',
+                'vendor/angularfire/dist/angularfire.js'
             ],
             css: [
                 'vendor/angular-growl-v2/build/angular-growl.min.css'
@@ -451,34 +453,34 @@ module.exports = function(grunt) {
         /**
          * The Karma configurations.
          */
-        karma: {
-            options: {
-                configFile: '<%= build_dir %>/karma-unit.js'
-            },
-            unit: {
-                runnerPort: 9101,
-                background: true
-            },
-            continuous: {
-                singleRun: true
-            }
-        },
+        // karma: {
+        //     options: {
+        //         configFile: '<%= build_dir %>/karma-unit.js'
+        //     },
+        //     unit: {
+        //         runnerPort: 9101,
+        //         background: true
+        //     },
+        //     continuous: {
+        //         singleRun: true
+        //     }
+        // },
 
         /**
          * This task compiles the karma template so that changes to its file array
          * don't have to be managed manually.
          */
-        karmaconfig: {
-            unit: {
-                dir: '<%= build_dir %>',
-                src: [
-                    '<%= vendor_files.js %>',
-                    '<%= html2js.app.dest %>',
-                    '<%= html2js.common.dest %>',
-                    '<%= test_files.js %>'
-                ]
-            }
-        },
+        // karmaconfig: {
+        //     unit: {
+        //         dir: '<%= build_dir %>',
+        //         src: [
+        //             '<%= vendor_files.js %>',
+        //             '<%= html2js.app.dest %>',
+        //             '<%= html2js.common.dest %>',
+        //             '<%= test_files.js %>'
+        //         ]
+        //     }
+        // },
 
         /**
          * And for rapid development, we have a watch set up that checks to see if
@@ -520,7 +522,7 @@ module.exports = function(grunt) {
                 files: [
                     '<%= app_files.js %>'
                 ],
-                tasks: [ 'jshint:src', 'karma:unit:run', 'copy:build_appjs' ]
+                tasks: [ 'jshint:src', 'copy:build_appjs' ]
             },
 
             /**
@@ -531,7 +533,7 @@ module.exports = function(grunt) {
                 files: [
                     '<%= app_files.coffee %>'
                 ],
-                tasks: [ 'coffeelint:src', 'coffee:source', 'karma:unit:run', 'copy:build_appjs' ]
+                tasks: [ 'coffeelint:src', 'coffee:source', 'copy:build_appjs' ]
             },
 
             /**
@@ -589,7 +591,7 @@ module.exports = function(grunt) {
                 files: [
                     '<%= app_files.jsunit %>'
                 ],
-                tasks: [ 'jshint:test', 'karma:unit:run' ],
+                tasks: [ 'jshint:test' ],
                 options: {
                     livereload: false
                 }
@@ -603,7 +605,7 @@ module.exports = function(grunt) {
                 files: [
                     '<%= app_files.coffeeunit %>'
                 ],
-                tasks: [ 'coffeelint:test', 'karma:unit:run' ],
+                tasks: [ 'coffeelint:test' ],
                 options: {
                     livereload: false
                 }
@@ -622,7 +624,7 @@ module.exports = function(grunt) {
     // 'delta') and then add a new task called 'watch' that does a clean build
     // before watching for changes.
     grunt.renameTask('watch', 'delta');
-    grunt.registerTask('watch', [ 'build', 'karma:unit', 'express', 'delta' ]);
+    grunt.registerTask('watch', [ 'build', 'express', 'delta' ]);
 
     // The default task is to build and compile.
     grunt.registerTask('default', [ 'build', 'compile' ]);
@@ -631,8 +633,7 @@ module.exports = function(grunt) {
     grunt.registerTask('build', [
         'clean', 'html2js', 'jshint', 'coffeelint', 'coffee', 'recess:build',
         'concat:build_css', 'copy:build_app_assets', 'copy:build_vendor_assets',
-        'copy:build_appjs', 'copy:build_vendorjs', 'index:build', 'karmaconfig',
-        'karma:continuous'
+        'copy:build_appjs', 'copy:build_vendorjs', 'index:build'
     ]);
 
     // The 'compile' task gets your app ready for deployment by concatenating and minifying your code.
@@ -694,19 +695,19 @@ module.exports = function(grunt) {
     // In order to avoid having to specify manually the files needed for karma to
     // run, we use grunt to manage the list for us. The 'karma/*' files are
     // compiled as grunt templates for use by Karma. Yay!
-    grunt.registerMultiTask('karmaconfig', 'Process karma config templates', function () {
-        var jsFiles = filterForJS(this.filesSrc);
+    // grunt.registerMultiTask('karmaconfig', 'Process karma config templates', function () {
+    //     var jsFiles = filterForJS(this.filesSrc);
 
-        grunt.file.copy('karma/karma-unit.tpl', grunt.config('build_dir') + '/karma-unit.js', { // FS change extension to .tpl to keep WebStorm from complaining
-            process: function (contents, path) {
-                // This is the variable looped over in the karma template of our index.html exposed as "scripts"
-                return grunt.template.process(contents, {
-                    data: {
-                        scripts: jsFiles
-                    }
-                });
-            }
-        });
-    });
+    //     grunt.file.copy('karma/karma-unit.tpl', grunt.config('build_dir') + '/karma-unit.js', { // FS change extension to .tpl to keep WebStorm from complaining
+    //         process: function (contents, path) {
+    //             // This is the variable looped over in the karma template of our index.html exposed as "scripts"
+    //             return grunt.template.process(contents, {
+    //                 data: {
+    //                     scripts: jsFiles
+    //                 }
+    //             });
+    //         }
+    //     });
+    // });
 
 };

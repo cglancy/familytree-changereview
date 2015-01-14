@@ -23,6 +23,7 @@
     "angular": false,
     "_": false,
     "console": false,
-    "setTimeout": false
+    "setTimeout": false,
+	"Firebase": true
   }
 }
