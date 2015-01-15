@@ -14,16 +14,19 @@
         $scope.treeGenerations = 8;
 
         fsCurrentUserCache.getUser().then(function(user) {
-          $scope.userName = user.displayName;
+          $scope.agentId = user.treeUserId;
         });
 
         var rootRef = new $window.Firebase('https://shining-heat-1351.firebaseio.com/ftcr');
         var changesRef = rootRef.child('/changes');
         var fbChangesRef = $firebase(changesRef);
-        var userChangesRef = rootRef.child('/users/1/changes');
-        var fbUserChangesRef = $firebase(userChangesRef);
+        //$scope.userPersons = $firebase(rootRef.child('/agents/' + $scope.agentId + '/persons')).$asArray();
 
         function findPersonChanges(person) {
+
+          var userChangesRef = rootRef.child('/agents/' + $scope.agentId + '/changes');
+          var fbUserChangesRef = $firebase(userChangesRef);
+          
           fsApi.getPersonChanges(person.id).then(function(response) {
 
             var changes = response.getChanges();
@@ -58,12 +61,11 @@
                 agentId: agentId,
                 order: order,
                 updatedDate: updatedDate,
-                reason: reason,
-                requested: false
+                reason: reason
               };
 
               fbUserChangesRef.$set(change.id, true);
-              fbChangesRef.$set(change.id, changeObj);
+              fbChangesRef.$update(change.id, changeObj);
             }
 
           });
@@ -80,7 +82,7 @@
           }).then(function(response) {
 
             var personsRef = rootRef.child('/persons');
-            var userPersonsRef = rootRef.child('/users/1/persons');
+            var userPersonsRef = rootRef.child('/agents/' + $scope.agentId + '/persons');
 
             var persons = response.getPersons();
 

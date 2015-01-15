@@ -11,12 +11,6 @@
     })
     .controller('HomeController', function ($scope, $rootScope, fsCurrentUserCache, $firebase, $window, ftcrCommentModal) {
 
-      fsCurrentUserCache.getUser().then(function(user) {
-        $rootScope.loggedInStatus = 'Logged in as ' + user.displayName;
-        $scope.userName = user.displayName;
-        $scope.agentId = user.treeUserId;
-      }); 
-
       $scope.filterType = 'tree';
       $scope.requestedCount = 0;
       $scope.myChangesCount = 0;
@@ -25,10 +19,15 @@
       var globalChangesRef = rootRef.child('/changes');
       $scope.changes = $firebase(globalChangesRef).$asArray();
 
-      $scope.userChanges = $firebase(rootRef.child('/users/1/changes')).$asObject();
+      fsCurrentUserCache.getUser().then(function(user) {
+        $rootScope.loggedInStatus = 'Logged in as ' + user.displayName;
+        $scope.userDisplayName = user.displayName;
+        $scope.agentId = user.treeUserId;
 
-      var userApprovalsRef = rootRef.child('/users/1/approvals');
-      $scope.userApprovals = $firebase(userApprovalsRef).$asObject();
+        $scope.userChanges = $firebase(rootRef.child('/agents/' +$scope.agentId+ '/changes')).$asObject();
+        var userApprovalsRef = rootRef.child('/agents/' +$scope.agentId+ '/approvals');
+        $scope.userApprovals = $firebase(userApprovalsRef).$asObject();
+      }); 
 
       $scope.changes.$watch(function() {
 
@@ -64,7 +63,7 @@
             return true;
           }
         }
-        else { // treee
+        else if ($scope.userChanges) { // tree
           if (change.id in $scope.userChanges) {
             return true;
           }
@@ -91,10 +90,10 @@
 
       $scope.approve = function(changeId, approveState) {
 
-        var approvalsRef = rootRef.child('/changes/' + changeId + '/approvals/1');
+        var approvalsRef = rootRef.child('/changes/' + changeId + '/approvals/' + $scope.agentId);
         var fbApprovalsRef = $firebase(approvalsRef);
 
-        var userApprovalsRef = rootRef.child('/users/1/approvals/' + changeId);
+        var userApprovalsRef = rootRef.child('/agents/' +$scope.agentId+ '/approvals/' + changeId);
         var fbUserApprovalsRef = $firebase(userApprovalsRef);
 
         if (approveState === true) {
@@ -118,7 +117,7 @@
           var commentsRef = rootRef.child('/changes/' + change.id + '/comments');
           var fbCommentsRef = $firebase(commentsRef).$asArray();
 
-          var userName = $scope.userName;
+          var userName = $scope.userDisplayName;
 
           var commentObj = {
             user: 1,
