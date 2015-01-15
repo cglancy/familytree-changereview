@@ -42,6 +42,7 @@
               //var changeUrl = 'https://familysearch.org/tree/#view=personChangeLog&person=' + person.id;
 
               var changeObj = {
+                id: change.id,
                 title: change.title,
                 type: type,
                 subjectType: 'person',
@@ -54,8 +55,8 @@
                 reason: reason
               };
 
-              fbChangesRef.$set(change.id, true);
-              fbUserChangesRef.$set(change.id, changeObj);
+              fbUserChangesRef.$set(change.id, true);
+              fbChangesRef.$set(change.id, changeObj);
             }
 
           });
