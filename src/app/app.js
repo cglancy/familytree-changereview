@@ -78,7 +78,6 @@
 
     .controller('AppController', function ($scope) {
       
-      $scope.treeGenerations = 4;
       $scope.environment = 'Sandbox';
       //$scope.environment = 'Beta';
 

@@ -11,6 +11,8 @@
     })
     .controller('SettingsController', function ($scope, fsApi, fsCurrentUserCache, fsChangeUtils, $firebase, $window) {
         
+        $scope.treeGenerations = 8;
+
         fsCurrentUserCache.getUser().then(function(user) {
           $scope.userName = user.displayName;
         });
@@ -35,10 +37,14 @@
               }
               var type = fsChangeUtils.getType(change);
               var updatedDate = new Date(change.updated).toLocaleDateString();
-              var subjectUrl = person.$getPersonUrl();
               var subjectDisplay = person.display.name;
               var agentName = change.$getAgentName();
               var order = -change.updated;
+
+              var agentUrl = change.$getAgentUrl();
+              var n = agentUrl.lastIndexOf('/');
+              var agentId = agentUrl.substring(n + 1);
+
               //var changeUrl = 'https://familysearch.org/tree/#view=personChangeLog&person=' + person.id;
 
               var changeObj = {
@@ -48,8 +54,8 @@
                 subjectType: 'person',
                 subjectId: person.id,
                 subjectDisplay: subjectDisplay,
-                subjectUrl: subjectUrl,
                 agentName: agentName,
+                agentId: agentId,
                 order: order,
                 updatedDate: updatedDate,
                 reason: reason,
@@ -65,7 +71,7 @@
 
         function findAncestors(user, gens) {
 
-          console.log('finding ancestors for id = ' + user.personId);
+          console.log('finding ' + gens + ' generations of ancestors for id = ' + user.personId);
 
           fsApi.getAncestry(user.personId, {
             generations: gens,

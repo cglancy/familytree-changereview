@@ -14,7 +14,12 @@
       fsCurrentUserCache.getUser().then(function(user) {
         $rootScope.loggedInStatus = 'Logged in as ' + user.displayName;
         $scope.userName = user.displayName;
+        $scope.agentId = user.treeUserId;
       }); 
+
+      $scope.filterType = 'tree';
+      $scope.requestedCount = 0;
+      $scope.myChangesCount = 0;
 
       var rootRef = new $window.Firebase('https://shining-heat-1351.firebaseio.com/ftcr');
       var globalChangesRef = rootRef.child('/changes');
@@ -25,31 +30,44 @@
       var userApprovalsRef = rootRef.child('/users/1/approvals');
       $scope.userApprovals = $firebase(userApprovalsRef).$asObject();
 
-      // function addToChangesArray(ref) {
-      //   // ref.once('value', function(snap) {
-      //   //   $timeout(function() {
-      //   //     $scope.changes.push(snap.val());
-      //   //   });
-      //   // });      
-      //     ref.$on('value', function(change) {
-      //       console.log('change = ' + change.id);
-      //     });
-      // }
+      $scope.changes.$watch(function() {
 
-      // userChanges.$watch(function() {
+        $scope.requestedCount = 0;
+        $scope.myChangesCount = 0;
 
-      //   $scope.changes = [];
+        for (var i = 0, len = $scope.changes.length; i < len; i++) {
+          if ($scope.changes[i].requested === true) {
+            $scope.requestedCount++;
+          }
 
-      //   for (var i = 0, len = userChanges.length; i < len; i++) {
-      //     var changeId = userChanges.$keyAt(i);
-      //     //addToChangesArray(globalChangesRef.child('/' + changeId));
-      //     addToChangesArray($globalChanges.$child('/' + changeId));
-      //   }
-      // });
+          if ($scope.changes[i].agentId === $scope.agentId) {
+            $scope.myChangesCount++;
+          }
+        }
+      });
+
+      $scope.filterType = 'tree';
+
+      $scope.setFilter = function(filterType) {
+        $scope.filterType = filterType;
+      };
 
       $scope.filterFunction = function(change) {
-        if (change.id in $scope.userChanges) {
-          return true;
+
+        if ($scope.filterType === 'mine') {
+          if (change.agentId === $scope.agentId) {
+            return true;
+          }
+        }
+        else if ($scope.filterType === 'requested') {
+          if (change.requested === true) {
+            return true;
+          }
+        }
+        else { // treee
+          if (change.id in $scope.userChanges) {
+            return true;
+          }
         }
 
         return false;

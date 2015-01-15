@@ -1,9 +1,9 @@
 <div class="row">
 	<div class="col-md-3">
 		<div class="btn-group-vertical" role="group" aria-label="...">
-				<button type="button" class="btn btn-default">Changes to My Tree <span class="badge">{{changes.length}}</span></button>
-				<button type="button" class="btn btn-default">Requested Reviews <span class="badge">0</span></button>
-				<button type="button" class="btn btn-default">Changes by Me <span class="badge">0</span></button>
+				<button type="button" class="btn btn-default" ng-click="setFilter('tree')">Changes to My Tree <span class="badge">{{changes.length}}</span></button>
+				<button type="button" class="btn btn-default" ng-click="setFilter('requested')">Requested Reviews <span class="badge">{{requestedCount}}</span></button>
+				<button type="button" class="btn btn-default" ng-click="setFilter('mine')">Changes by Me <span class="badge">{{myChangesCount}}</span></button>
 		</div>
 	</div>
 	<div class="col-md-9">	
