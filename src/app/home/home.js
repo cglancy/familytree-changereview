@@ -108,9 +108,29 @@
             text: text,
             timestamp: 0 
           };
-          
+
           fbCommentsRef.$add(commentObj);
         });
+      };
+
+      $scope.isRequested = function(change) {
+          var changeRef = $firebase(rootRef.child('/changes/' + change.id)).$asObject();
+          if (changeRef.requested === true) {
+            return true;
+          }
+
+          return false;
+      };
+
+      $scope.requestReview = function(change, requestState) {
+          var changeRef = $firebase(rootRef.child('/changes/' + change.id));
+
+          if (requestState === true) {
+            changeRef.$update({requested: true});
+          }
+          else {
+            changeRef.$update({requested: false});
+          }
       };
 
     });

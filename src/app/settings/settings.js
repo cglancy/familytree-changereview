@@ -52,7 +52,8 @@
                 agentName: agentName,
                 order: order,
                 updatedDate: updatedDate,
-                reason: reason
+                reason: reason,
+                requested: false
               };
 
               fbUserChangesRef.$set(change.id, true);

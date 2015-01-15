@@ -27,7 +27,8 @@
 			</div>
 			<div class="panel-footer">
 				<button type="button" class="btn btn-default" ng-click="addComment(change)">Add Comment</button>
-				<button type="button" class="btn btn-default pull-right">Request Review</button>
+				<button type="button" class="btn btn-default pull-right" ng-show="!change.requested" ng-click="requestReview(change, true)">Request Review</button>
+				<button type="button" class="btn btn-default pull-right" ng-show="change.requested" ng-click="requestReview(change, false)">Cancel Review</button>
 			</div>
 <!--  			<div class="input-group">
       			<input type="text" class="form-control" placeholder="Add comment...">
