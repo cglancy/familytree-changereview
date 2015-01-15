@@ -9,7 +9,7 @@
         data: { pageTitle: 'Home' }
       });
     })
-    .controller('HomeController', function ($scope, $rootScope, fsCurrentUserCache, $firebase, $window) {
+    .controller('HomeController', function ($scope, $rootScope, fsCurrentUserCache, $firebase, $window, ftcrCommentModal) {
 
       fsCurrentUserCache.getUser().then(function(user) {
         $rootScope.loggedInStatus = 'Logged in as ' + user.displayName;
@@ -93,12 +93,24 @@
         }
       };
 
-      $scope.comment = function(changeId, text) {
-        console.log('comment for change ' + changeId + ': ' + text);
-       
-        var commentsRef = rootRef.child('/changes/' + changeId + '/comments');
-        var fbCommentsRef = $firebase(commentsRef);
-        fbCommentsRef.$add({ user: 1, by: $scope.userName, text: text });
+      $scope.addComment = function(change) {
+        ftcrCommentModal.open().then(function(text) {
+          console.log('comment text = ' + text);
+
+          var commentsRef = rootRef.child('/changes/' + change.id + '/comments');
+          var fbCommentsRef = $firebase(commentsRef).$asArray();
+
+          var userName = $scope.userName;
+
+          var commentObj = {
+            user: 1,
+            by: userName,
+            text: text,
+            timestamp: 0 
+          };
+          
+          fbCommentsRef.$add(commentObj);
+        });
       };
 
     });

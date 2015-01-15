@@ -1,0 +1,13 @@
+<div class="sourceDialog createSource" id="sourceCreateDialog" tabindex="-1" role="dialog" aria-labelledby="sourceCreateDialogLabel" aria-hidden="true">
+  <div class="modal-header">
+    <button type="button" ng-click="cancel()" class="close" aria-hidden="true">&times;</button>
+    <h4 class="modal-title" id="sourceCreateDialogLabel">Add Comment</h4>
+  </div>
+  <div class="modal-body">
+    <textarea ng-model="$parent.commentText"></textarea>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-default" ng-click="cancel()">Cancel</button>
+    <button type="button" class="btn btn-default" ng-click="post()">Post Comment</button>
+  </div>
+</div>

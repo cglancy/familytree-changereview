@@ -9,30 +9,33 @@
 	<div class="col-md-9">	
 		<div ng-repeat="change in changes | orderBy:'order' | filter:filterFunction" class="panel panel-default panel-default">
 			<div class="panel-heading">
-				<h3 class="panel-title">{{change.title}}</h3>
-			</div>
-			<div class="panel-body">
 				<button type="button" class="btn btn-default pull-right" ng-show="!isApproved(change)" ng-click="approve(change.id, true)">
 						<span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Approve
 				</button>
 				<button type="button" class="btn btn-default pull-right ng-hide" ng-show="isApproved(change)" ng-click="approve(change.id, false)">
 						<span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Disapprove
 				</button>
-				<p>{{change.subjectDisplay}}</p>
+				<h3 class="panel-title">{{change.title}} for  {{change.subjectDisplay}}</h3>
 				<p>{{change.updatedDate}} by {{change.agentName}}</p>
 				<p>Reason: {{change.reason}}</p>
-				<p>Number of approvals: {{approvalsCount(change)}}</p>
+				<p class="text-right">Number of approvals: {{approvalsCount(change)}}</p>
 			</div>
-			<ul class="list-group">
-				<li ng-repeat="comment in change.comments" class="list-group-item"><strong>{{comment.user.name}}:</strong> {{comment.text}}</li>
-			</ul>
-<!-- 			<div class="input-group">
+			<div class="panel-body">
+				<ul class="list-group">
+					<li ng-repeat="comment in change.comments" class="list-group-item"><strong>{{comment.by}}:</strong> {{comment.text}}</li>
+				</ul>
+			</div>
+			<div class="panel-footer">
+				<button type="button" class="btn btn-default" ng-click="addComment(change)">Add Comment</button>
+				<button type="button" class="btn btn-default pull-right">Request Review</button>
+			</div>
+<!--  			<div class="input-group">
       			<input type="text" class="form-control" placeholder="Add comment...">
       			<span class="input-group-btn">
         			<button class="btn btn-default" type="button">Post</button>
       			</span>
     		</div>
- -->		</div>
+ --> 		</div>
 	</div>
 </div>
 
