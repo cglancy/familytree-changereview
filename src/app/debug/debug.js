@@ -21,6 +21,7 @@
         var father = new fsApi.Person();
         father.$setGender('http://gedcomx.org/Male');
         father.$addName({givenName: 'Person' + fatherAhnen, surname: 'Surname'});
+        father.display.living = false;
         father.$save('Created for testing', true).then(function(fatherId) {
 
           console.log('created father id = ' + fatherId + ' for person id = ' + childId);
@@ -29,6 +30,7 @@
           var mother = new fsApi.Person();
           mother.$setGender('http://gedcomx.org/Female');
           mother.$addName({givenName: 'Person' + motherAhnen, surname: 'Surname'});
+          mother.display.living = false;
           mother.$save('Created for testing', true).then(function(motherId) {
 
             console.log('created mother id = ' + motherId + ' for person id = ' + childId);

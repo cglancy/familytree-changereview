@@ -8,9 +8,9 @@
 		<button type="button" class="btn btn-default pull-right">
 				<span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Approve
 		</button>
-		<p>Detail</p>
-		<p>{{change.timestamp.toUTCString()}} by contrib</p>
-		<p>Reason: reason</p>
+		<p>{{change.subjectDisplay}}</p>
+		<p>{{change.updatedDate}} by {{change.agentName}}</p>
+		<p>Reason: {{change.reason}}</p>
 	</div>
 	<ul class="list-group">
 		<li ng-repeat="comment in change.comments" class="list-group-item"><strong>{{comment.user.name}}:</strong> {{comment.text}}</li>
