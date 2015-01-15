@@ -82,6 +82,12 @@
       $scope.environment = 'Sandbox';
       //$scope.environment = 'Beta';
 
+      // $scope.$on('newSession', function() {
+      //   fsCurrentUserCache.getUser().then(function(user) {
+      //     $scope.loggedInStatus = 'Logged in as ' + user.displayName;
+      //   });
+      // });
+
       // don't forget to edit index.html to add {Track:js} script on demo
 
       $scope.$on('$stateChangeStart', function(event, toState) {

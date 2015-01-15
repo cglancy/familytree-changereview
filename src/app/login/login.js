@@ -9,11 +9,15 @@
         data: { pageTitle: 'Login' }
       });
     })
-    .controller('LoginController', function ($scope, $state, $rootScope, fsApi) {
+    .controller('LoginController', function ($scope, $state, $rootScope, fsApi, fsCurrentUserCache) {
       $scope.signIn = function() {
         fsApi.getAccessToken().then(function() {
           $rootScope.$emit('newSession');
           $state.go('home');
+
+          fsCurrentUserCache.getUser().then(function(user) {
+            $rootScope.loggedInStatus = 'Logged in as ' + user.displayName;
+          });        
         });
       };
 

@@ -1,19 +1,29 @@
-<p>Logged in as {{userName}}</p>
+<div class="row">
+	<div class="col-md-3">
+		<div class="btn-group-vertical" role="group" aria-label="...">
+				<button type="button" class="btn btn-default">All Changes <span class="badge">5</span></button>
+				<button type="button" class="btn btn-default">Requested Reviews <span class="badge">4</span></button>
+				<button type="button" class="btn btn-default">Changes to My Tree <span class="badge">1</span></button>
+		</div>
+	</div>
+	<div class="col-md-9">	
+		<div ng-repeat="change in changes | orderBy:'order'" class="panel panel-default panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title">{{change.title}}</h3>
+			</div>
+			<div class="panel-body">
+				<button type="button" class="btn btn-default pull-right">
+						<span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Approve
+				</button>
+				<p>{{change.subjectDisplay}}</p>
+				<p>{{change.updatedDate}} by {{change.agentName}}</p>
+				<p>Reason: {{change.reason}}</p>
+			</div>
+			<ul class="list-group">
+				<li ng-repeat="comment in change.comments" class="list-group-item"><strong>{{comment.user.name}}:</strong> {{comment.text}}</li>
+			</ul>
+		</div>
+	</div>
+</div>
 
-<div ng-repeat="change in changes" class="panel panel-default panel-default">
-	<div class="panel-heading">
-		<h3 class="panel-title">{{change.title}}</h3>
-	</div>
-	<div class="panel-body">
-		<button type="button" class="btn btn-default pull-right">
-				<span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Approve
-		</button>
-		<p>{{change.subjectDisplay}}</p>
-		<p>{{change.updatedDate}} by {{change.agentName}}</p>
-		<p>Reason: {{change.reason}}</p>
-	</div>
-	<ul class="list-group">
-		<li ng-repeat="comment in change.comments" class="list-group-item"><strong>{{comment.user.name}}:</strong> {{comment.text}}</li>
-	</ul>
-</div>		
 
