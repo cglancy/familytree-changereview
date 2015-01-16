@@ -15,9 +15,9 @@
 
     .config(function(fsApiProvider) {
       fsApiProvider
-        .setClientId('WCQY-7J1Q-GKVV-7DNM-SQ5M-9Q5H-JX3H-CMJK')
+        .setClientId('a0T3000000BMRakEAH')
         .setEnvironmentName('sandbox')
-        .setRedirectUri('http://localhost:9000/#!/auth');
+        .setRedirectUri('http://peertrees.com/auth.html');
         //.setEnvironmentName('beta')
         //.setRedirectUri('http://demo.werelate.org/#/auth');
     })
