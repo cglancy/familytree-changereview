@@ -12,7 +12,7 @@
 				<button type="button" class="btn btn-default pull-right" ng-show="!isApproved(change)" ng-click="approve(change.id, true)">
 						<span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Approve
 				</button>
-				<button type="button" class="btn btn-default pull-right ng-hide" ng-show="isApproved(change)" ng-click="approve(change.id, false)">
+				<button type="button" class="btn btn-success pull-right ng-hide" ng-show="isApproved(change)" ng-click="approve(change.id, false)">
 						<span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Disapprove
 				</button>
 				<h3 class="panel-title">{{change.title}} for  {{change.subjectDisplay}}</h3>
