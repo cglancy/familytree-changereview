@@ -15,10 +15,17 @@
 				<button type="button" class="btn btn-success pull-right ng-hide" ng-show="isApproved(change)" ng-click="approve(change.id, false)">
 						<span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Disapprove
 				</button>
-				<h3 class="panel-title">{{change.title}} for  {{change.subjectDisplay}}</h3>
+
+				<h3 class="panel-title">{{change.title}} for <a href="{{personUrl + change.subjectId}}">{{change.subjectDisplay}}</a></h3>
 				<p>{{change.updatedDate}} by {{change.agentName}}</p>
-				<p>Reason: {{change.reason}}</p>
-				<p class="text-right">Number of approvals: {{approvalsCount(change)}}</p>
+
+				<button type="button" class="btn btn-default pull-right" ng-show="!change.requested" ng-click="requestReview(change, true)"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Request Review</button>
+				<button type="button" class="btn btn-warning pull-right" ng-show="change.requested" ng-click="requestReview(change, false)"><span class="glyphicon glyphicon-ban-circle" aria-hidden="true"></span> Cancel Review</button>
+
+				<p>Reason: {{change.reason}}</p>				
+				<p>Number of approvals: {{approvalsCount(change)}}</p>
+
+
 			</div>
 			<div class="panel-body">
 				<ul class="list-group">
@@ -26,17 +33,14 @@
 				</ul>
 			</div>
 			<div class="panel-footer">
-				<button type="button" class="btn btn-default" ng-click="addComment(change)">Add Comment</button>
-				<button type="button" class="btn btn-default pull-right" ng-show="!change.requested" ng-click="requestReview(change, true)">Request Review</button>
-				<button type="button" class="btn btn-default pull-right" ng-show="change.requested" ng-click="requestReview(change, false)">Cancel Review</button>
+			    <div class="input-group">
+			    	<input type="text" class="form-control" placeholder="Add comment..." ng-model="change.commentText">
+			    	<span class="input-group-btn">
+			    		<button class="btn btn-default" type="button" ng-click="addComment(change)">Post</button>
+			    	</span>
+			    </div>
 			</div>
-<!--  			<div class="input-group">
-      			<input type="text" class="form-control" placeholder="Add comment...">
-      			<span class="input-group-btn">
-        			<button class="btn btn-default" type="button">Post</button>
-      			</span>
-    		</div>
- --> 		</div>
+ 		</div>
 	</div>
 </div>
 

@@ -9,12 +9,13 @@
         data: { pageTitle: 'Home' }
       });
     })
-    .controller('HomeController', function ($scope, $rootScope, fsCurrentUserCache, $firebase, $window, ftcrCommentModal) {
+    .controller('HomeController', function ($scope, $rootScope, fsCurrentUserCache, $firebase, $window) {
 
       $scope.filterType = 'tree';
       $scope.requestedCount = 0;
       $scope.myChangesCount = 0;
-
+      $scope.personUrl = 'https://sandbox.familysearch.org/tree/#view=ancestor&person=';
+  
       var rootRef = new $window.Firebase('https://shining-heat-1351.firebaseio.com/ftcr');
       var globalChangesRef = rootRef.child('/changes');
       $scope.changes = $firebase(globalChangesRef).$asArray();
@@ -111,8 +112,10 @@
       };
 
       $scope.addComment = function(change) {
-        ftcrCommentModal.open().then(function(text) {
-          console.log('comment text = ' + text);
+
+        console.log('comment text = ' + change.commentText);
+
+        if (change.commentText && change.commentText.length > 0) {
 
           var commentsRef = rootRef.child('/changes/' + change.id + '/comments');
           var fbCommentsRef = $firebase(commentsRef).$asArray();
@@ -122,12 +125,13 @@
           var commentObj = {
             user: 1,
             by: userName,
-            text: text,
+            text: change.commentText,
             timestamp: 0 
           };
 
           fbCommentsRef.$add(commentObj);
-        });
+          change.commentText = '';
+        }
       };
 
       $scope.isRequested = function(change) {
