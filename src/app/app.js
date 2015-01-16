@@ -78,6 +78,7 @@
 
     .controller('AppController', function ($scope) {
       
+      $scope.pageTitle = 'PeerTrees';
       $scope.environment = 'Sandbox';
       //$scope.environment = 'Beta';
 
