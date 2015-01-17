@@ -24,8 +24,11 @@
           if (user.email.length) {
             email = user.email;
           }
+          else {
+            email = user.treeUserId; // fallback             
+          }
 
-          console.log('Attempting to authenticate with email =' + email);
+          console.log('Attempting to authenticate with email = ' + email);
 
           var ref = new $window.Firebase('https://shining-heat-1351.firebaseio.com');
           ref.authWithPassword({
