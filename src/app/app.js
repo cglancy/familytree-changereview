@@ -18,8 +18,6 @@
         .setClientId('a0T3000000BMRakEAH')
         .setEnvironmentName('sandbox')
         .setRedirectUri('http://peertrees.com/auth.html');
-        //.setEnvironmentName('beta')
-        //.setRedirectUri('http://demo.werelate.org/#/auth');
     })
 
     .config(function(fsLocationProvider) {
