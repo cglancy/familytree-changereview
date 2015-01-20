@@ -32,6 +32,7 @@
 
       $scope.changes.$watch(function() {
 
+        $scope.userChangeCount = 0;
         $scope.requestedCount = 0;
         $scope.myChangesCount = 0;
 
@@ -42,6 +43,10 @@
 
           if ($scope.changes[i].agentId === $scope.agentId) {
             $scope.myChangesCount++;
+          }
+
+          if ($scope.changes.$keyAt(i) in $scope.userChanges) {
+            $scope.userChangeCount++;
           }
         }
       });
