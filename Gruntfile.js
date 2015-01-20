@@ -237,7 +237,7 @@ module.exports = function(grunt) {
                     '<%= build_dir %>/src/common/**/*.js',
                     '<%= build_dir %>/templates-common.js'
                 ],
-                dest: '<%= compile_dir %>/fsreferenceclient-common-<%= pkg.version %>.js'
+                dest: '<%= compile_dir %>/peertrees-common-<%= pkg.version %>.js'
             }
 
         },
