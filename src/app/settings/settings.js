@@ -17,7 +17,7 @@
           $scope.agentId = user.treeUserId;
         });
 
-        var rootRef = new $window.Firebase('https://shining-heat-1351.firebaseio.com/ftcr');
+        var rootRef = new $window.Firebase('https://shining-heat-1351.firebaseio.com/sandbox');
         var changesRef = rootRef.child('/changes');
         var fbChangesRef = $firebase(changesRef);
         //$scope.userPersons = $firebase(rootRef.child('/agents/' + $scope.agentId + '/persons')).$asArray();

@@ -15,41 +15,101 @@
       $scope.requestedCount = 0;
       $scope.myChangesCount = 0;
       $scope.personUrl = 'https://sandbox.familysearch.org/tree/#view=ancestor&person=';
+      $scope.changeList = [];
+      $scope.changes = [];
+      $scope.scrollDisabled = true;
   
-      var rootRef = new $window.Firebase('https://shining-heat-1351.firebaseio.com/ftcr');
-      var globalChangesRef = rootRef.child('/changes');
-      $scope.changes = $firebase(globalChangesRef).$asArray();
+      var rootRef = new $window.Firebase('https://shining-heat-1351.firebaseio.com/sandbox');
+
+      function updateChange(changeId) {
+
+        // var changeRef = rootRef.child('changes').child(changeId);
+        // changeRef.on('value', function(c) {
+        //   $timeout(function() {
+        //     var change = c.val();
+        //     $scope.changes.push(change);
+
+        //     if (change.requested === true) {
+        //       $scope.requestedCount++;
+        //     }
+
+        //     if (change.agentId === $scope.agentId) {
+        //       $scope.myChangesCount++;
+        //     }
+        //   });
+        // });
+
+
+        var change = $firebase(rootRef.child('changes').child(changeId)).$asObject();
+        change.$loaded().then(function() {
+
+          $scope.changeList.push(change);
+
+          if (change.requested === true) {
+            $scope.requestedCount++;
+          }
+
+          if (change.agentId === $scope.agentId) {
+            $scope.myChangesCount++;
+          }
+
+          if ($scope.changeList.length > 10) {
+            $scope.scrollDisabled = false;
+          }
+        });
+      }
+
+      function updateChanges() {
+
+        console.log('updateChanges(), scrollDisabled = ' + $scope.scrollDisabled);
+
+        $scope.scrollDisabled = true;
+        $scope.changeList = [];
+
+        $scope.requestedCount = 0;
+        $scope.myChangesCount = 0;
+
+        for (var i = 0, len = $scope.userChanges.length; i < len; i++) {
+          var changeId = $scope.userChanges.$keyAt(i);
+          updateChange(changeId);
+        }
+     }
+
+      $scope.loadMore = function() {
+        var length = $scope.changes.length;
+        console.log('loadMore, length = ' + length);
+        for (var i = 0; i < 10; i++) {
+          var index = length + i;
+          if (index < $scope.changeList.length) {
+            $scope.changes.push($scope.changeList[index]);
+          }
+        }
+      };
+
+      // function initialLoad() {
+      //   return $q(function(resolve) {
+      //     resolve('done');
+      //   });
+      // }
 
       fsCurrentUserCache.getUser().then(function(user) {
         $rootScope.loggedInStatus = 'Logged in as ' + user.displayName;
         $scope.userDisplayName = user.displayName;
         $scope.agentId = user.treeUserId;
 
-        $scope.userChanges = $firebase(rootRef.child('/agents/' +$scope.agentId+ '/changes')).$asObject();
+        $scope.userChanges = $firebase(rootRef.child('/agents/' +$scope.agentId+ '/changes')).$asArray();
         var userApprovalsRef = rootRef.child('/agents/' +$scope.agentId+ '/approvals');
         $scope.userApprovals = $firebase(userApprovalsRef).$asObject();
+
+        $scope.userChanges.$loaded().then(function() {
+          $scope.userChangeCount = $scope.userChanges.length;
+          updateChanges();
+          // initialLoad().then(function() {
+          //   $scope.scrollDisabled = false;
+          // });
+        });
       }); 
 
-      $scope.changes.$watch(function() {
-
-        $scope.userChangeCount = 0;
-        $scope.requestedCount = 0;
-        $scope.myChangesCount = 0;
-
-        for (var i = 0, len = $scope.changes.length; i < len; i++) {
-          if ($scope.changes[i].requested === true) {
-            $scope.requestedCount++;
-          }
-
-          if ($scope.changes[i].agentId === $scope.agentId) {
-            $scope.myChangesCount++;
-          }
-
-          if ($scope.changes.$keyAt(i) in $scope.userChanges) {
-            $scope.userChangeCount++;
-          }
-        }
-      });
 
       $scope.filterType = 'tree';
 
@@ -69,10 +129,8 @@
             return true;
           }
         }
-        else if ($scope.userChanges) { // tree
-          if (change.id in $scope.userChanges) {
-            return true;
-          }
+        else if ($scope.filterType === 'tree') {
+          return true;
         }
 
         return false;

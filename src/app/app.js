@@ -3,6 +3,7 @@
   angular.module('fsReferenceClient', [
     'fsReferenceClientShared',
     'firebase',
+    'infinite-scroll',
     'templates-app',
     'templates-common',
     'ui.bootstrap',
@@ -15,9 +16,11 @@
 
     .config(function(fsApiProvider) {
       fsApiProvider
-        .setClientId('a0T3000000BMRakEAH')
+        //.setClientId('a0T3000000BMRakEAH')
+        .setClientId('WCQY-7J1Q-GKVV-7DNM-SQ5M-9Q5H-JX3H-CMJK')
         .setEnvironmentName('sandbox')
-        .setRedirectUri('http://peertrees.com/auth.html');
+        //.setRedirectUri('http://peertrees.com/auth.html');
+        .setRedirectUri('http://localhost:9000/#!/auth');
     })
 
     .config(function(fsLocationProvider) {
