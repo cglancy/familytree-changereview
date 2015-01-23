@@ -10,6 +10,9 @@
     'ui.router.state',
     'ui.router'
   ])
+    .constant('FIREBASE_URL', 'https://shining-heat-1351.firebaseio.com/sandbox')
+    .constant('FS_URL', 'https://sandbox.familysearch.org')
+    
     .config(function($stateProvider, $urlRouterProvider) {
       $urlRouterProvider.otherwise('/');
     })

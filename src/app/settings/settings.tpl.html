@@ -1,18 +1,24 @@
-<h3>PeerTrees Settings</h3>
-<p>Monitor 8 generations of your Family Tree for changes.</p>
-<!-- Number of generations: <input type="text" ng-model="treeGenerations"></input>
-<button class="btn btn-large btn-primary" type="submit"ng-click="createAncestry(treeGenerations)">Create Test Ancestry</button> -->
-<button class="btn btn-large btn-primary" type="submit" ng-click="getTree(treeGenerations)">Refresh My Tree</button>
+<h3>Settings</h3>
 
-<table class="table table-striped">
-  <thead>
-  	<tr>
-    	<th>Name</th>
-    	<th>ID</th>
-  	</tr>
-  </thead>
-  <tr ng-repeat="p in persons">
-    <td>{{ p.display.name }}</td>
-    <td>{{ p.id }}</td>
-  </tr>
-</table>
+
+<div class="row">
+  <div class="col-xs-6">
+    <h4>Watchlist ({{personsCount}} Persons)</h4>
+    <div class="well" style="height: 300px;overflow: auto;">
+      <table class="table">
+<!--         <thead>
+         <tr>
+           <th>Name</th>
+           <th>ID</th>
+         </tr>
+       </thead> -->
+       <tr ng-repeat="p in persons">
+        <td>{{ p.display.name }}</td>
+        <td>{{ p.id }}</td>
+      </tr>
+    </table>
+  </div>
+  <p>PeerTrees currently monitor up to 8 generations of your Family Tree ancestors for changes.</p>
+  <button class="btn btn-large btn-primary" type="submit" ng-click="updateDefaultWatchlist()">Refresh Watchlist</button>        
+</div>
+</div>

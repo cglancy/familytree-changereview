@@ -9,121 +9,61 @@
         data: { pageTitle: 'Settings' }
       });
     })
-    .controller('SettingsController', function ($scope, fsApi, fsCurrentUserCache, fsChangeUtils, $firebase, $window) {
-        
-        $scope.treeGenerations = 8;
+    .controller('SettingsController', function ($scope, fsApi, fsCurrentUserCache, fsChangeUtils, $firebase, $window, ftrFindPersons, FIREBASE_URL) {
+
+        var rootRef = new $window.Firebase(FIREBASE_URL);
 
         fsCurrentUserCache.getUser().then(function(user) {
           $scope.agentId = user.treeUserId;
+
+          $scope.userPersonIds = $firebase(rootRef.child('/agents/' + $scope.agentId + '/persons')).$asArray();
+          $scope.userPersonIds.$loaded(function() {
+            $scope.personsCount = $scope.userPersonIds.length;
+            getAllPersonDetails();
+            $scope.userPersonIds.$watch(function(event) {
+              getPersonDetails(event.key);
+            });
+          });
         });
 
-        var rootRef = new $window.Firebase('https://shining-heat-1351.firebaseio.com/sandbox');
-        var changesRef = rootRef.child('/changes');
-        var fbChangesRef = $firebase(changesRef);
-        //$scope.userPersons = $firebase(rootRef.child('/agents/' + $scope.agentId + '/persons')).$asArray();
+        $scope.persons = {};
+        $scope.personsCount = 0;
 
-        function findPersonChanges(person) {
 
-          var userChangesRef = rootRef.child('/agents/' + $scope.agentId + '/changes');
-          var fbUserChangesRef = $firebase(userChangesRef);
-          
-          fsApi.getPersonChanges(person.id).then(function(response) {
-
-            var changes = response.getChanges();
-
-            for (var i = 0, len = changes.length; i < len; i++) {
-
-              var change = changes[i];
-              var reason = change.$getChangeReason();
-              if (!reason) {
-                reason = '';
-              }
-              var type = fsChangeUtils.getType(change);
-              var updatedDate = new Date(change.updated).toLocaleDateString();
-              var subjectDisplay = person.display.name;
-              var agentName = change.$getAgentName();
-              var order = -change.updated;
-
-              var agentUrl = change.$getAgentUrl();
-              var n = agentUrl.lastIndexOf('/');
-              var agentId = agentUrl.substring(n + 1);
-
-              //var changeUrl = 'https://familysearch.org/tree/#view=personChangeLog&person=' + person.id;
-
-              var changeObj = {
-                id: change.id,
-                title: change.title,
-                type: type,
-                subjectType: 'person',
-                subjectId: person.id,
-                subjectDisplay: subjectDisplay,
-                agentName: agentName,
-                agentId: agentId,
-                order: order,
-                updatedDate: updatedDate,
-                reason: reason
-              };
-
-              fbUserChangesRef.$set(change.id, true);
-              fbChangesRef.$update(change.id, changeObj);
-            }
-
+        function getPersonDetails(personId) {
+          var promise = fsApi.getPerson(personId);
+          promise.then(function(response) {
+            $scope.persons[personId] = response.getPerson();
+            //console.log('Last-Modified = ' + promise.getResponseHeader('Last-Modified'));
           });
         }
 
-        function findAncestors(user, gens) {
+        function getAllPersonDetails() {
+          console.log('getting details for ' + $scope.userPersonIds.length + ' persons.');
 
-          console.log('finding ' + gens + ' generations of ancestors for id = ' + user.personId);
-
-          fsApi.getAncestry(user.personId, {
-            generations: gens,
-            personDetails: false,
-            marriageDetails: false
-          }).then(function(response) {
-
-            var personsRef = rootRef.child('/persons');
-            var userPersonsRef = rootRef.child('/agents/' + $scope.agentId + '/persons');
-
-            var persons = response.getPersons();
-
-            for (var i = 0, len = persons.length; i < len; i++) {
-              var person = persons[i];
-
-              // we must not display or store living persons
-              if (!person.living) {
-                $scope.persons.push(person);
-
-                $firebase(personsRef.child(person.id)).$set(true);
-                $firebase(userPersonsRef.child(person.id)).$set(true);
-
-                findPersonChanges(person);
-              }
-              else {
-                console.log('Skipping living person ' + person.display.name);
-              }
-
-              // if (person.living && person.display.ahnen !== 1) {
-              //   var deathFact = new fsApi.Fact();
-              //   deathFact.$setType('http://gedcomx.org/Death');
-              //   person.$addFact(deathFact);
-              //   person.$save();
-              // }
-
-            }
-
-          });
-
+          for (var i = 0, len = $scope.userPersonIds.length; i < len; i++) {
+            getPersonDetails($scope.userPersonIds.$keyAt(i));
+          }
         }
 
-        $scope.getTree = function(generations) {
-
-          $scope.persons = [];
+        $scope.updateDefaultWatchlist = function() {
 
           fsCurrentUserCache.getUser().then(function(user) {
-            findAncestors(user, generations);
-          });
 
+            console.log('finding 8 generations of ancestors for id = ' + user.personId);
+
+            var watchlist = {
+              rootId: user.personId,
+              type: 'ancestors',
+              generations: 8
+            };
+
+            ftrFindPersons.updateWatchlist($scope.agentId, watchlist);
+          });
         };
+
+
+
 
       function createParents(childId, ahnen, maxAhnen) {
 

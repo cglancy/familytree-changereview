@@ -41,7 +41,7 @@ module.exports = function(grunt) {
               'src/**/*.js',
               '!src/**/*.spec.js',
               '!src/assets/**/*.js',
-			  '!src/common/fs-traversal/*.js'
+			        'src/common/fs-traversal/*.js'
             ],
             jsunit: [ 'src/**/*.spec.js' ],
 

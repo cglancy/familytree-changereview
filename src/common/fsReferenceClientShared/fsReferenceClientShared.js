@@ -4,5 +4,6 @@ angular.module('fsReferenceClientShared', [
   'panzoom',
   'ui.bootstrap',
   'infinite-scroll',
-  'angular-growl'
+  'angular-growl',
+  'firebase'
 ]);

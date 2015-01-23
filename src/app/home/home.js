@@ -9,7 +9,7 @@
         data: { pageTitle: 'Home' }
       });
     })
-    .controller('HomeController', function ($scope, $rootScope, fsCurrentUserCache, $firebase, $window) {
+    .controller('HomeController', function ($scope, $rootScope, fsCurrentUserCache, $firebase, $window, $q, FIREBASE_URL) {
 
       $scope.filterType = 'tree';
       $scope.requestedCount = 0;
@@ -18,79 +18,75 @@
       $scope.changeList = [];
       $scope.changes = [];
       $scope.scrollDisabled = true;
+      $scope.nextToLoad = 0;
   
-      var rootRef = new $window.Firebase('https://shining-heat-1351.firebaseio.com/sandbox');
+      var rootRef = new $window.Firebase(FIREBASE_URL);
 
-      function updateChange(changeId) {
+      function loadChange(changeId) {
+        var deferred = $q.defer();
 
-        // var changeRef = rootRef.child('changes').child(changeId);
-        // changeRef.on('value', function(c) {
-        //   $timeout(function() {
-        //     var change = c.val();
-        //     $scope.changes.push(change);
-
-        //     if (change.requested === true) {
-        //       $scope.requestedCount++;
-        //     }
-
-        //     if (change.agentId === $scope.agentId) {
-        //       $scope.myChangesCount++;
-        //     }
-        //   });
-        // });
-
-
-        var change = $firebase(rootRef.child('changes').child(changeId)).$asObject();
-        change.$loaded().then(function() {
-
-          $scope.changeList.push(change);
-
-          if (change.requested === true) {
-            $scope.requestedCount++;
-          }
-
-          if (change.agentId === $scope.agentId) {
-            $scope.myChangesCount++;
-          }
-
-          if ($scope.changeList.length > 10) {
-            $scope.scrollDisabled = false;
-          }
+        var changeRef = $firebase(rootRef.child('/changes/' + changeId)).$asObject();
+        changeRef.$loaded().then(function(change) {
+          deferred.resolve(change);
         });
+
+        return deferred.promise;
       }
 
-      function updateChanges() {
+      function loadAndAddChange(changeId) {
+        var deferred = $q.defer();
 
-        console.log('updateChanges(), scrollDisabled = ' + $scope.scrollDisabled);
+        loadChange(changeId).then(function(change) {
+          $scope.changes.push(change);
+          deferred.resolve(change);
+        });
 
-        $scope.scrollDisabled = true;
-        $scope.changeList = [];
-
-        $scope.requestedCount = 0;
-        $scope.myChangesCount = 0;
-
-        for (var i = 0, len = $scope.userChanges.length; i < len; i++) {
-          var changeId = $scope.userChanges.$keyAt(i);
-          updateChange(changeId);
-        }
-     }
+        return deferred.promise;
+      }
 
       $scope.loadMore = function() {
-        var length = $scope.changes.length;
-        console.log('loadMore, length = ' + length);
+        if ($scope.loading) {
+          return;
+        }
+
+        $scope.loading = true;
+        var defer = $q.defer();
+        var promises = [];
+
+        console.log('loadMore, nextToLoad = ' + $scope.nextToLoad);
+
         for (var i = 0; i < 10; i++) {
-          var index = length + i;
-          if (index < $scope.changeList.length) {
-            $scope.changes.push($scope.changeList[index]);
+          var index = $scope.nextToLoad + i;
+          if (index < $scope.userChanges.length) {
+            var promise = loadAndAddChange($scope.userChanges.$keyAt(index));
+            promises.push(promise);
           }
         }
+
+        $q.all(promises).then(function() {
+          $scope.nextToLoad += 10;
+          $scope.loading = false;
+        });
+
+        return defer;
       };
 
-      // function initialLoad() {
-      //   return $q(function(resolve) {
-      //     resolve('done');
-      //   });
-      // }
+      function initialLoad() {
+        var defer = $q.defer();
+        var promises = [];
+        var count = $scope.userChanges.length < 10 ? $scope.userChanges.length : 10;
+        for (var i = 0; i < count; i++) {
+          var promise = loadAndAddChange($scope.userChanges.$keyAt(i));
+          promises.push(promise);
+        }
+
+        $q.all(promises).then(function() {
+          $scope.nextToLoad = 10;
+          $scope.scrollDisabled = false;
+        });
+
+        return defer;
+      }
 
       fsCurrentUserCache.getUser().then(function(user) {
         $rootScope.loggedInStatus = 'Logged in as ' + user.displayName;
@@ -103,10 +99,8 @@
 
         $scope.userChanges.$loaded().then(function() {
           $scope.userChangeCount = $scope.userChanges.length;
-          updateChanges();
-          // initialLoad().then(function() {
-          //   $scope.scrollDisabled = false;
-          // });
+
+          initialLoad();
         });
       }); 
 
