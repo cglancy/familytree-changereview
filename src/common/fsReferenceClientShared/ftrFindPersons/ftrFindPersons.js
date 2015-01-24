@@ -95,7 +95,7 @@
           var changesRef = rootRef.child('/changes');
           var fbChangesRef = $firebase(changesRef);          
           var userChangesRef = rootRef.child('/agents/' + userId + '/changes');
-          var fbUserChangesRef = $firebase(userChangesRef);
+          //var fbUserChangesRef = $firebase(userChangesRef);
           
           fsApi.getPersonChanges(person.id).then(function(response) {
 
@@ -107,13 +107,17 @@
 
               if (storeChange(change)) {
                 var changeObj = {
-                  id: change.id,
                   subjectType: 'person',
                   subjectId: person.id,
                   updated: change.updated
                 };
 
-                fbUserChangesRef.$set(change.id, true);
+                // var userChangeObj = {
+                //   timestamp: Firebase.ServerValue.TIMESTAMP
+                // };
+
+                //fbUserChangesRef.$set(change.id, userChangeObj);
+                userChangesRef.child(change.id).setWithPriority(change.updated, -change.updated);
                 fbChangesRef.$update(change.id, changeObj);
               }
             }

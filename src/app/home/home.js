@@ -9,13 +9,12 @@
         data: { pageTitle: 'Home' }
       });
     })
-    .controller('HomeController', function ($scope, $rootScope, fsCurrentUserCache, $firebase, $window, $q, FIREBASE_URL) {
+    .controller('HomeController', function ($scope, $rootScope, fsCurrentUserCache, $firebase, $window, $q, FIREBASE_URL, fsApi, ftrUserChangesCache) {
 
       $scope.filterType = 'tree';
       $scope.requestedCount = 0;
       $scope.myChangesCount = 0;
       $scope.personUrl = 'https://sandbox.familysearch.org/tree/#view=ancestor&person=';
-      $scope.changeList = [];
       $scope.changes = [];
       $scope.scrollDisabled = true;
       $scope.nextToLoad = 0;
@@ -25,20 +24,9 @@
       function loadChange(changeId) {
         var deferred = $q.defer();
 
-        var changeRef = $firebase(rootRef.child('/changes/' + changeId)).$asObject();
-        changeRef.$loaded().then(function(change) {
-          deferred.resolve(change);
-        });
-
-        return deferred.promise;
-      }
-
-      function loadAndAddChange(changeId) {
-        var deferred = $q.defer();
-
-        loadChange(changeId).then(function(change) {
+        ftrUserChangesCache.getChange(changeId).then(function(change) {
           $scope.changes.push(change);
-          deferred.resolve(change);
+          deferred.resolve(change);          
         });
 
         return deferred.promise;
@@ -58,7 +46,7 @@
         for (var i = 0; i < 10; i++) {
           var index = $scope.nextToLoad + i;
           if (index < $scope.userChanges.length) {
-            var promise = loadAndAddChange($scope.userChanges.$keyAt(index));
+            var promise = loadChange($scope.userChanges.$keyAt(index));
             promises.push(promise);
           }
         }
@@ -76,7 +64,7 @@
         var promises = [];
         var count = $scope.userChanges.length < 10 ? $scope.userChanges.length : 10;
         for (var i = 0; i < count; i++) {
-          var promise = loadAndAddChange($scope.userChanges.$keyAt(i));
+          var promise = loadChange($scope.userChanges.$keyAt(i));
           promises.push(promise);
         }
 
@@ -93,7 +81,7 @@
         $scope.userDisplayName = user.displayName;
         $scope.agentId = user.treeUserId;
 
-        $scope.userChanges = $firebase(rootRef.child('/agents/' +$scope.agentId+ '/changes')).$asArray();
+        $scope.userChanges = $firebase(rootRef.child('/agents/' +$scope.agentId+ '/changes').orderByPriority()).$asArray();
         var userApprovalsRef = rootRef.child('/agents/' +$scope.agentId+ '/approvals');
         $scope.userApprovals = $firebase(userApprovalsRef).$asObject();
 
