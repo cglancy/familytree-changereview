@@ -24,6 +24,12 @@
           changesCache = {};
         },
 
+        invalidateChange: function(changeId) {
+          if (changeId in changesCache) {
+            delete changesCache[changeId];
+          }
+        },
+
         getChange: function(changeId) {
           var deferred = $q.defer();
 
@@ -62,6 +68,7 @@
                       var agentId = agentUrl.substring(n + 1);
 
                       var details = {
+                        id: fsChange.id,
                         title: fsChange.title,
                         type: type,
                         subjectDisplay: subjectDisplay,

@@ -102,7 +102,7 @@
       $scope.filterFunction = function(change) {
 
         if ($scope.filterType === 'mine') {
-          if (change.agentId === $scope.agentId) {
+          if (change.details.agentId === $scope.agentId) {
             return true;
           }
         }
@@ -118,8 +118,8 @@
         return false;
       };
       
-      $scope.isApproved = function(change) {
-        if (change.id in $scope.userApprovals) {
+      $scope.isApproved = function(changeId) {
+        if (changeId in $scope.userApprovals) {
           return true;
         }
         
@@ -136,23 +136,25 @@
 
       $scope.approve = function(changeId, approveState) {
 
-        var approvalsRef = rootRef.child('/changes/' + changeId + '/approvals/' + $scope.agentId);
-        var fbApprovalsRef = $firebase(approvalsRef);
+        if (!!changeId) {
+          var approvalsRef = rootRef.child('/changes/' + changeId + '/approvals/' + $scope.agentId);
+          var fbApprovalsRef = $firebase(approvalsRef);
 
-        var userApprovalsRef = rootRef.child('/agents/' +$scope.agentId+ '/approvals/' + changeId);
-        var fbUserApprovalsRef = $firebase(userApprovalsRef);
+          var userApprovalsRef = rootRef.child('/agents/' +$scope.agentId+ '/approvals/' + changeId);
+          var fbUserApprovalsRef = $firebase(userApprovalsRef);
 
-        if (approveState === true) {
-          console.log('approved change ' + changeId);
+          if (approveState === true) {
+            console.log('approved change ' + changeId);
 
-          fbApprovalsRef.$set(true);
-          fbUserApprovalsRef.$set(true);
-        }
-        else {
-          console.log('disapproved change ' + changeId);
+            fbApprovalsRef.$set(true);
+            fbUserApprovalsRef.$set(true);
+          }
+          else {
+            console.log('disapproved change ' + changeId);
 
-          fbApprovalsRef.$remove();
-          fbUserApprovalsRef.$remove();
+            fbApprovalsRef.$remove();
+            fbUserApprovalsRef.$remove();
+          }
         }
       };
 
@@ -162,26 +164,33 @@
 
         if (change.commentText && change.commentText.length > 0) {
 
-          var commentsRef = rootRef.child('/changes/' + change.id + '/comments');
+          var commentsRef = rootRef.child('/changes/' + change.details.id + '/comments');
           var fbCommentsRef = $firebase(commentsRef).$asArray();
 
           var userName = $scope.userDisplayName;
 
           var commentObj = {
-            user: 1,
+            userId: $scope.agentId,
             by: userName,
             text: change.commentText,
-            timestamp: 0 
+            t: $window.Firebase.ServerValue.TIMESTAMP
           };
 
           fbCommentsRef.$add(commentObj);
+          if (!!change.comments) {
+            change.comments.push(commentObj);            
+          }
+          else {
+            change.comments = [];
+            change.comments.push(commentObj); 
+          }
+
           change.commentText = '';
         }
       };
 
       $scope.isRequested = function(change) {
-          var changeRef = $firebase(rootRef.child('/changes/' + change.id)).$asObject();
-          if (changeRef.requested === true) {
+          if (change.requested === true) {
             return true;
           }
 
@@ -189,12 +198,14 @@
       };
 
       $scope.requestReview = function(change, requestState) {
-          var changeRef = $firebase(rootRef.child('/changes/' + change.id));
+          var changeRef = $firebase(rootRef.child('/changes/' + change.details.id));
 
           if (requestState === true) {
+            change.requested = true;
             changeRef.$update({requested: true});
           }
           else {
+            change.requested = false;
             changeRef.$update({requested: false});
           }
       };

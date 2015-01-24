@@ -10,10 +10,10 @@
 		<div infinite-scroll="loadMore()" infinite-scroll-distance="2" infinite-scroll-disabled="scrollDisabled">
 			<div ng-repeat="change in changes track by $index" class="panel panel-default panel-default">
 				<div class="panel-heading">
-					<button type="button" class="btn btn-default pull-right" ng-show="!isApproved(change)" ng-click="approve(change.id, true)">
+					<button type="button" class="btn btn-default pull-right" ng-show="!isApproved(change.details.id)" ng-click="approve(change.details.id, true)">
 							<span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Approve
 					</button>
-					<button type="button" class="btn btn-success pull-right ng-hide" ng-show="isApproved(change)" ng-click="approve(change.id, false)">
+					<button type="button" class="btn btn-success pull-right ng-hide" ng-show="isApproved(change.details.id)" ng-click="approve(change.details.id, false)">
 							<span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Disapprove
 					</button>
 
