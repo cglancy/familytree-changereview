@@ -8,22 +8,22 @@
 	</div>
 	<div class="col-md-9">
 		<div infinite-scroll="loadMore()" infinite-scroll-distance="2" infinite-scroll-disabled="scrollDisabled">
-			<div ng-repeat="change in changes track by $index" class="panel panel-default panel-default">
+			<div ng-repeat="change in changes track by change.id" class="panel panel-default panel-default">
 				<div class="panel-heading">
-					<button type="button" class="btn btn-default pull-right" ng-show="!isApproved(change.details.id)" ng-click="approve(change.details.id, true)">
+					<button type="button" class="btn btn-default pull-right" ng-show="!isApproved(change.id)" ng-click="approve(change.id, true)">
 							<span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Approve
 					</button>
-					<button type="button" class="btn btn-success pull-right ng-hide" ng-show="isApproved(change.details.id)" ng-click="approve(change.details.id, false)">
+					<button type="button" class="btn btn-success pull-right ng-hide" ng-show="isApproved(change.id)" ng-click="approve(change.id, false)">
 							<span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Disapprove
 					</button>
 
-					<h3 class="panel-title">{{change.details.title}} for <a href="{{personUrl + change.subjectId}}">{{change.details.subjectDisplay}}</a></h3>
-					<p>{{change.details.updatedDate}} by {{change.details.agentName}}</p>
+					<h3 class="panel-title">{{change.title}} for <a href="{{personUrl + change.subjectId}}">{{change.subjectDisplay}}</a></h3>
+					<p>{{change.updatedDate}} by {{change.agentName}}</p>
 
 					<button type="button" class="btn btn-default pull-right" ng-show="!change.requested" ng-click="requestReview(change, true)"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Request Review</button>
 					<button type="button" class="btn btn-warning pull-right" ng-show="change.requested" ng-click="requestReview(change, false)"><span class="glyphicon glyphicon-ban-circle" aria-hidden="true"></span> Cancel Review</button>
 
-					<p>Reason: {{change.details.reason}}</p>				
+					<p>Reason: {{change.reason}}</p>				
 					<p>Number of approvals: {{approvalsCount(change)}}</p>
 
 

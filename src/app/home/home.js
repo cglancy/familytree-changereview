@@ -102,7 +102,7 @@
       $scope.filterFunction = function(change) {
 
         if ($scope.filterType === 'mine') {
-          if (change.details.agentId === $scope.agentId) {
+          if (change.agentId === $scope.agentId) {
             return true;
           }
         }
@@ -164,7 +164,7 @@
 
         if (change.commentText && change.commentText.length > 0) {
 
-          var commentsRef = rootRef.child('/changes/' + change.details.id + '/comments');
+          var commentsRef = rootRef.child('/changes/' + change.id + '/comments');
           var fbCommentsRef = $firebase(commentsRef).$asArray();
 
           var userName = $scope.userDisplayName;
@@ -177,13 +177,13 @@
           };
 
           fbCommentsRef.$add(commentObj);
-          if (!!change.comments) {
-            change.comments.push(commentObj);            
-          }
-          else {
-            change.comments = [];
-            change.comments.push(commentObj); 
-          }
+          // if ('comments' in change) {
+          //   change.comments.push(commentObj);            
+          // }
+          // else {
+          //   change['comments'] = [];
+          //   change.comments.push(commentObj); 
+          // }
 
           change.commentText = '';
         }
@@ -198,7 +198,7 @@
       };
 
       $scope.requestReview = function(change, requestState) {
-          var changeRef = $firebase(rootRef.child('/changes/' + change.details.id));
+          var changeRef = $firebase(rootRef.child('/changes/' + change.id));
 
           if (requestState === true) {
             change.requested = true;

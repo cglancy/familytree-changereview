@@ -2,92 +2,7 @@
   'use strict';
   angular.module('fsReferenceClientShared')
 
-    .factory('ftrFindPersons', function($q, fsApi, $window, $firebase, ftrUtils, FIREBASE_URL, fsChangeUtils) {
-
-        function storeChange(change) {
-
-          var type = fsChangeUtils.getType(change);
-          var objectType = fsChangeUtils.getModifiedObjectType(change);
-
-          if (objectType !== 'http://gedcomx.org/Person') {
-            return false;
-          }
-
-          var keep = false;
-
-          switch (type) {
-            case 'http://gedcomx.org/Person':
-            case 'http://gedcomx.org/Couple':
-            case 'http://familysearch.org/v1/ChildAndParentsRelationship':
-            case 'http://familysearch.org/v1/Man':
-            case 'http://familysearch.org/v1/Woman':
-            case 'http://familysearch.org/v1/Father':
-            case 'http://familysearch.org/v1/Mother':
-            case 'http://familysearch.org/v1/Child':
-            case 'http://gedcomx.org/SourceReference':
-            case 'http://familysearch.org/v1/EvidenceReference':
-            case 'http://familysearch.org/v1/Affiliation':
-            case 'http://gedcomx.org/Annulment':
-            case 'http://gedcomx.org/BarMitzvah':
-            case 'http://gedcomx.org/BatMitzvah':
-            case 'http://gedcomx.org/Birth':
-            case 'http://gedcomx.org/Burial':
-            case 'http://gedcomx.org/Christening':
-            case 'http://gedcomx.org/Cremation':
-            case 'http://gedcomx.org/CommonLawMarriage':
-            case 'http://gedcomx.org/Death':
-            case 'http://gedcomx.org/Divorce':
-            case 'http://gedcomx.org/Marriage':
-            case 'http://gedcomx.org/MilitaryService':
-            case 'http://gedcomx.org/Naturalization':
-            case 'http://gedcomx.org/Occupation':
-            case 'http://gedcomx.org/Religion':
-            case 'http://gedcomx.org/Residence':
-            case 'http://gedcomx.org/Stillbirth':
-            case 'http://gedcomx.org/Fact':
-            case 'http://gedcomx.org/Caste':
-            case 'http://gedcomx.org/Clan':
-            case 'http://gedcomx.org/NationalId':
-            case 'http://gedcomx.org/Nationality':
-            case 'http://gedcomx.org/PhysicalDescription':
-            case 'http://gedcomx.org/Ethnicity':
-            case 'http://gedcomx.org/Gender':
-            case 'http://gedcomx.org/Name':
-            case 'http://gedcomx.org/BirthName':
-            case 'http://gedcomx.org/AlsoKnownAs':
-            case 'http://gedcomx.org/MarriedName':
-            case 'http://gedcomx.org/Nickname':
-            case 'http://familysearch.org/v1/DiedBeforeEight':
-            case 'http://familysearch.org/v1/TribeName':
-            case 'http://familysearch.org/v1/BirthOrder':
-            case 'http://familysearch.org/v1/LifeSketch':
-            case 'http://familysearch.org/v1/TitleOfNobility':
-            case 'http://familysearch.org/v1/Baptism':
-            case 'http://familysearch.org/v1/Confirmation':
-            case 'http://familysearch.org/v1/Initiatory':
-            case 'http://familysearch.org/v1/Endowment':
-            case 'http://familysearch.org/v1/Sealing':
-            case 'http://familysearch.org/v1/NotAMatch':
-              keep = true;
-              break;
-            case 'http://gedcomx.org/Note':
-            case 'http://familysearch.org/v1/DiscussionReference':
-            case 'http://familysearch.org/v1/LivingStatus':
-              keep = false;
-              break;
-            default:
-              console.log('Unhandled Change type: ' + type);
-              break;
-          }
-
-          // if (keep) {
-          //   console.log('keeping ' + type);
-          // } else {
-          //   console.log('discarding ' + type);
-          // }
-
-          return keep;
-        }
+    .factory('ftrFindPersons', function($q, fsApi, $window, $firebase, ftrUtils, FIREBASE_URL, fsChangeUtils, ftrChangeUtils) {
 
         function findPersonChanges(userId, person) {
 
@@ -105,11 +20,32 @@
 
               var change = changes[i];
 
-              if (storeChange(change)) {
+              if (ftrChangeUtils.isChangeOfInterest(change)) {
+                var reason = change.$getChangeReason();
+                if (!reason) {
+                  reason = '';
+                }
+                var type = fsChangeUtils.getType(change);
+                var updatedDate = new Date(change.updated).toLocaleDateString();
+                var subjectDisplay = person.display.name;
+                var agentName = change.$getAgentName();
+
+                var agentUrl = change.$getAgentUrl();
+                var n = agentUrl.lastIndexOf('/');
+                var agentId = agentUrl.substring(n + 1);
+
                 var changeObj = {
+                  id: change.id,
                   subjectType: 'person',
                   subjectId: person.id,
-                  updated: change.updated
+                  updated: change.updated,
+                  title: change.title,
+                  type: type,
+                  subjectDisplay: subjectDisplay,
+                  agentName: agentName,
+                  agentId: agentId,
+                  updatedDate: updatedDate,
+                  reason: reason
                 };
 
                 // var userChangeObj = {

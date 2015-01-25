@@ -9,7 +9,7 @@
         data: { pageTitle: 'Settings' }
       });
     })
-    .controller('SettingsController', function ($scope, fsApi, fsCurrentUserCache, fsChangeUtils, $firebase, $window, ftrFindPersons, FIREBASE_URL, ftrUserPersonsCache) {
+    .controller('SettingsController', function ($scope, fsApi, fsCurrentUserCache, fsChangeUtils, $firebase, $window, ftrFindPersons, FIREBASE_URL, ftrPersonsCache) {
 
         var rootRef = new $window.Firebase(FIREBASE_URL);
 
@@ -31,7 +31,7 @@
 
 
         function getPersonDetails(personId) {
-          ftrUserPersonsCache.getPerson(personId).then(function(person) {
+          ftrPersonsCache.getPerson(personId).then(function(person) {
             $scope.persons[personId] = person;
           });
         }

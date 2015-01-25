@@ -1,23 +1,33 @@
 (function(){
   'use strict';
   angular.module('fsReferenceClientShared')
-    .factory('ftrUserPersonsCache', function ($q, fsApi, fsCurrentUserCache, $window, $firebase, FIREBASE_URL) {
+    .factory('ftrPersonsCache', function (_, $q, fsApi, fsCurrentUserCache, $window, $firebase, FIREBASE_URL) {
 
       var rootRef = new $window.Firebase(FIREBASE_URL);
       var personsCache = {};
       var userId;
+      var userPersonIds;
 
       fsCurrentUserCache.getUser().then(function(user) {
         userId = user.treeUserId;
-        var userPersonIds = $firebase(rootRef.child('/agents/' + userId + '/persons')).$asArray();
+        userPersonIds = $firebase(rootRef.child('/agents/' + userId + '/persons')).$asArray();
         userPersonIds.$loaded().then(function() {
           userPersonIds.$watch(function(event) {
             if (event.key in personsCache) {
-              delete personsCache[event.key];              
+              updatePerson(event.key);            
             }
           });
         });
       });
+
+      function updatePerson(personId) {
+        if (personId in personsCache) {
+          fsApi.getPerson(personId).then(function(response) {
+            var person = response.getPerson();
+            _.merge(personsCache[personId], person);
+          });
+        }
+      }
 
       return {
         clear: function() {
