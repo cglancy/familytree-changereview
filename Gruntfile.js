@@ -88,6 +88,7 @@ module.exports = function(grunt) {
                 // TODO when angular-bootstrap v0.12 comes out, check whether
                 // it includes https://github.com/angular-ui/bootstrap/issues/220
                 //'vendor/angular-bootstrap/ui-bootstrap-tpls.min.js',
+                'vendor/angular-animate/angular-animate.js',
                 'vendor/angular-bootstrap-jbruni/ui-bootstrap-tpls.min.js',
                 'vendor/angular-ui-router/release/angular-ui-router.js',
                 'vendor/lodash/dist/lodash.compat.js',

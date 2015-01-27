@@ -9,12 +9,13 @@
         data: { pageTitle: 'Home' }
       });
     })
-    .controller('HomeController', function ($scope, $rootScope, fsCurrentUserCache, $firebase, $window, $q, FIREBASE_URL, fsApi, ftrUserChangesCache) {
+    .controller('HomeController', function ($scope, $rootScope, fsCurrentUserCache, $firebase, $window, 
+      $q, FIREBASE_URL, fsApi, ftrUserChangesCache, $interval, ftrFindPersons, ftrPollingForChanges, FS_URL) {
 
       $scope.filterType = 'tree';
       $scope.requestedCount = 0;
       $scope.myChangesCount = 0;
-      $scope.personUrl = 'https://sandbox.familysearch.org/tree/#view=ancestor&person=';
+      $scope.personUrl = FS_URL + '/tree/#view=ancestor&person=';
       $scope.changes = [];
       $scope.scrollDisabled = true;
       $scope.nextToLoad = 0;
@@ -87,8 +88,23 @@
 
         $scope.userChanges.$loaded().then(function() {
           $scope.userChangeCount = $scope.userChanges.length;
-
           initialLoad();
+
+          $scope.userChanges.$watch(function(event) {
+            if (event.event === 'child_added') {
+
+              var index = $scope.userChanges.$indexFor(event.key);
+              console.log('inserting change ' + event.key + ' at index ' + index);
+
+              ftrUserChangesCache.getChange(event.key).then(function(change) {
+                $scope.changes.splice(index, 0, change);
+
+                if (index <= $scope.nextToLoad) {
+                  $scope.nextToLoad++;
+                }
+              });
+            }
+          });
         });
       }); 
 
@@ -209,6 +225,31 @@
             changeRef.$update({requested: false});
           }
       };
+
+      $scope.pendingChanges = false;
+
+      ftrPollingForChanges.startPolling();
+
+      $rootScope.$on('personChanged', function() {
+        console.log('personChanged');
+        $scope.pendingChanges = true;
+      });
+
+      $scope.getPendingChanges = function() {
+        $scope.pendingChanges = false;
+        var personIds = ftrPollingForChanges.getChangedPersonIds();
+        fsCurrentUserCache.getUser().then(function(user) {
+          angular.forEach(personIds, function(id) {
+            console.log('updating person = ' + id);
+            ftrFindPersons.updatePerson(user.treeUserId, id);
+          });
+        });
+      };
+
+      $scope.$on('$destroy', function() {
+        // Make sure that the interval is destroyed too
+        ftrPollingForChanges.stopPolling();
+      });
 
     });
 })();

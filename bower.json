@@ -4,6 +4,7 @@
   "_comment": "Any dependencies added here require a manual edit to vendor_files in /Gruntfile.js",
   "dependencies": {
     "angular": "~1.2.16",
+    "angular-animate": "~1.2.16",
     "angular-bootstrap-jbruni": "git://github.com/jbruni/bootstrap-bower-jbruni.git#~0.10.5",
     "hamsterjs": "1.0.4",
     "angular-mousewheel": "1.0.4",

@@ -7,8 +7,13 @@
 		</div>
 	</div>
 	<div class="col-md-9">
+		<alert type="'success'" ng-show="pendingChanges" class="cssSlideUp">
+			<div class="text-center">
+		<button type="button" class="btn btn-success" ng-click="getPendingChanges()">Get New Changes</button>
+			</div>
+		</alert>
 		<div infinite-scroll="loadMore()" infinite-scroll-distance="2" infinite-scroll-disabled="scrollDisabled">
-			<div ng-repeat="change in changes track by change.id" class="panel panel-default panel-default">
+			<div ng-repeat="change in changes track by change.id" class="panel panel-default panel-default repeat-item">
 				<div class="panel-heading">
 					<button type="button" class="btn btn-default pull-right" ng-show="!isApproved(change.id)" ng-click="approve(change.id, true)">
 							<span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Approve

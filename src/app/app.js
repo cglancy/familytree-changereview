@@ -1,6 +1,7 @@
 (function () {
   'use strict';
   angular.module('fsReferenceClient', [
+    'ngAnimate',
     'fsReferenceClientShared',
     'firebase',
     'infinite-scroll',

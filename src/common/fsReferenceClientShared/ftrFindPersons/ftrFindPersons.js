@@ -2,7 +2,7 @@
   'use strict';
   angular.module('fsReferenceClientShared')
 
-    .factory('ftrFindPersons', function($q, fsApi, $window, $firebase, ftrUtils, FIREBASE_URL, fsChangeUtils, ftrChangeUtils) {
+    .factory('ftrFindPersons', function($q, fsApi, $window, $firebase, ftrUtils, FIREBASE_URL, fsChangeUtils, ftrChangeUtils, ftrPersonsCache) {
 
         function findPersonChanges(userId, person) {
 
@@ -68,18 +68,6 @@
           });
         }
 
-        function isPersonChanged(personId, fbTimestamp) {
-          ftrUtils.getPersonLastModified(personId).then(function(lastModified) {
-            var timestamp = Date.parse(lastModified);
-            if (timestamp === fbTimestamp) {
-              return false;
-            }
-            else {
-              return true;
-            }
-          });
-        }
-
       return {
         updateWatchlist: function(userId, watchlist) {
 
@@ -110,24 +98,20 @@
               }
             }
           });
-
         },
-        getChangedPersonIdsForUser: function(userId) {
-          var deferred = $q.defer();
-          var personIds = [];
-          var rootRef = new $window.Firebase(FIREBASE_URL);
-          var userPersonsIds = $firebase(rootRef.child('/agents/' + userId + '/persons')).$asArray();
-          userPersonsIds.$loaded().then(function() {
-            for (var i = 0, len = userPersonsIds.length; i < len; i++) {
-              if (isPersonChanged(userPersonsIds.$keyAt(i), userPersonsIds[i])) {
-                personIds.push(userPersonsIds.$keyAt(i));
-              }
-            }
-          });
 
-          deferred.resolve(personIds);
-          return deferred.promise;
+        updatePerson: function(userId, personId) {
+          
+          var rootRef = new $window.Firebase(FIREBASE_URL);
+          var personsRef = rootRef.child('/persons');
+          var userPersonsRef = rootRef.child('/agents/' + userId + '/persons');
+          storePerson(userId, personId, personsRef, userPersonsRef);
+
+          ftrPersonsCache.getPerson(personId).then(function(person) {
+            findPersonChanges(userId, person);
+          });
         }
+
       };
     });
 })();
