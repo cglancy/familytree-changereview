@@ -2,23 +2,23 @@
 	<div class="col-md-3">
 		<div class="btn-group-vertical" role="group" aria-label="...">
 				<button type="button" class="btn btn-default" ng-click="setFilter('tree')">Changes to My Tree <span class="badge">{{userChangeCount}}</span></button>
-				<button type="button" class="btn btn-default" ng-click="setFilter('requested')">Requested Reviews <span class="badge">{{requestedCount}}</span></button>
+				<button type="button" class="btn btn-default" ng-click="setFilter('unapproved')">Unapproved <span class="badge">{{requestedCount}}</span></button>
 				<button type="button" class="btn btn-default" ng-click="setFilter('mine')">Changes by Me <span class="badge">{{myChangesCount}}</span></button>
 		</div>
 	</div>
 	<div class="col-md-9">
-		<alert type="'success'" ng-show="pendingChanges" class="cssSlideUp">
+		<alert type="'success'" ng-show="pendingChanges" class="flip-in">
 			<div class="text-center">
 		<button type="button" class="btn btn-success" ng-click="getPendingChanges()">Get New Changes</button>
 			</div>
 		</alert>
 		<div infinite-scroll="loadMore()" infinite-scroll-distance="2" infinite-scroll-disabled="scrollDisabled">
-			<div ng-repeat="change in changes track by change.id" class="panel panel-default panel-default repeat-item">
+			<div ng-repeat="change in changes track by change.id" class="panel panel-default panel-default slide-down">
 				<div class="panel-heading">
-					<button type="button" class="btn btn-default pull-right" ng-show="!isApproved(change.id)" ng-click="approve(change.id, true)">
+					<button type="button" class="btn btn-default pull-right" ng-show="!isApproved(change)" ng-click="approve(change.id, true)">
 							<span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Approve
 					</button>
-					<button type="button" class="btn btn-success pull-right ng-hide" ng-show="isApproved(change.id)" ng-click="approve(change.id, false)">
+					<button type="button" class="btn btn-success pull-right ng-hide" ng-show="isApproved(change)" ng-click="approve(change.id, false)">
 							<span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Disapprove
 					</button>
 
