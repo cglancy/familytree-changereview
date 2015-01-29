@@ -10,14 +10,12 @@ production/
   |  |  |- presence: online
   |  |  |- reviewer: true
   |  |  |- changes/
-  |  |  |  |- cid1: fs-timestamp (priority = -fs-timestamp)
-  |  |  |  |- cid2: fs-timestamp
-  |  |  |- approvals/
-  |  |  |  |- cid3
-  |  |  |  |- cid4
-  |  |  |- reviewing/
-  |  |  |  |- cid5
-  |  |  |  |- cid7
+  |  |  |  |- cid1/
+  |  |  |  |- cid2/
+  |  |  |    |- updated: timestamp
+  |  |  |    |- reviewing: true
+  |  |  |    |- approved: false
+  |  |  |    |- mine: true
   |  |  |- persons/
   |  |  |  |- pid1: fs-timestamp
   |  |  |  |- pid2: fs-timestamp  
@@ -37,9 +35,9 @@ production/
   |  |  |  |- uid4: true
   |  |  |- comments/
   |  |  |  |- #1/
-  |  |  |    |- uid1
+  |  |  |    |- userId: uid1
   |  |  |    |- updated: fb-timestamp
-  |  |  |    |- text
+  |  |  |    |- text: string
   |- persons/
      |- pid1: fs-timestamp
      |- pid2: fs-timestamp

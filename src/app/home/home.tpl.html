@@ -1,9 +1,9 @@
 <div class="row">
 	<div class="col-md-3">
 		<div class="btn-group-vertical" role="group" aria-label="...">
-				<button type="button" class="btn btn-default" ng-click="setFilter('tree')">Changes to My Tree <span class="badge">{{userChangeCount}}</span></button>
-				<button type="button" class="btn btn-default" ng-click="setFilter('unapproved')">Unapproved <span class="badge">{{unapprovedCount}}</span></button>
-				<button type="button" class="btn btn-default" ng-click="setFilter('mine')">Changes by Me <span class="badge">{{myChangesCount}}</span></button>
+				<button type="button" class="btn btn-default" ng-click="setFilter('all')">Changes to My Tree <span class="badge">{{countTotals.all}}</span></button>
+				<button type="button" class="btn btn-default" ng-click="setFilter('unapproved')">Unapproved <span class="badge">{{countTotals.unapproved}}</span></button>
+				<button type="button" class="btn btn-default" ng-click="setFilter('mine')">Changes by Me <span class="badge">{{countTotals.mine}}</span></button>
 		</div>
 	</div>
 	<div class="col-md-9">
@@ -13,7 +13,7 @@
 			</div>
 		</alert>
 		<div>
-			<div ng-repeat="change in changes | orderBy:'index' | filter:filterFunction" class="panel panel-default panel-default">
+			<div ng-repeat="change in changes | orderBy:'order'" class="panel panel-default panel-default">
 				<div class="panel-heading">
 					<button type="button" class="btn btn-default pull-right" ng-show="!change.approved" ng-click="approve(change, true)">
 							<span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Approve
