@@ -1,47 +1,50 @@
-# The `src` Directory
+# PeerTrees Design
 
-## Overview
-
-The `src/` directory contains all code used in the application along with all
-tests of such code.
+## Firebase Data
 
 ```
-src/
-  |- app/
-  |  |- about/
-  |  |- home/
-  |  |- app.js
-  |  |- app.spec.js
-  |- assets/
-  |- common/
-  |- less/
-  |  |- main.less
-  |  |- variables.less
-  |- index.html
+production/
+  |- users/
+  |  |- uid1/
+  |  |- uid2/
+  |  |  |- presence: online
+  |  |  |- reviewer: true
+  |  |  |- changes/
+  |  |  |  |- cid1: fs-timestamp (priority = -fs-timestamp)
+  |  |  |  |- cid2: fs-timestamp
+  |  |  |- approvals/
+  |  |  |  |- cid3
+  |  |  |  |- cid4
+  |  |  |- reviewing/
+  |  |  |  |- cid5
+  |  |  |  |- cid7
+  |  |  |- persons/
+  |  |  |  |- pid1: fs-timestamp
+  |  |  |  |- pid2: fs-timestamp  
+  |- changes/
+  |  |- cid1/
+  |  |- cid2/
+  |  |  |- subjectType: 'person'
+  |  |  |- subjectId: pid4
+  |  |  |- approvals/
+  |  |  |  |- uid1: true
+  |  |  |  |- uid2: false
+  |  |  |- reviewers/
+  |  |  |  |- uid1: true
+  |  |  |  |- uid2: false
+  |  |  |- users/
+  |  |  |  |- uid1: true
+  |  |  |  |- uid4: true
+  |  |  |- comments/
+  |  |  |  |- #1/
+  |  |  |    |- uid1
+  |  |  |    |- updated: fb-timestamp
+  |  |  |    |- text
+  |- persons/
+     |- pid1: fs-timestamp
+     |- pid2: fs-timestamp
+
+
 ```
 
-- `src/app/` - application-specific code, i.e. code not likely to be reused in
-  another application. [Read more &raquo;](app/README.md)
-- `src/assets/` - static files like fonts and images. 
-  [Read more &raquo;](assets/README.md)
-- `src/common/` - third-party libraries or components likely to be reused in
-  another application. [Read more &raquo;](common/README.md)
-- `src/less/` - LESS CSS files. [Read more &raquo;](less/README.md)
-- `src/index.html` - this is the HTML document of the single-page application.
-  See below.
 
-See each directory for a detailed explanation.
-
-## `index.html`
-
-The `index.html` file is the HTML document of the single-page application (SPA)
-that should contain all markup that applies to everything in the app, such as
-the header and footer. It declares with `ngApp` that this is `fsReferenceClient`,
-specifies the main `AppController` controller, and contains the `ngView` directive
-into which route templates are placed.
-
-Unlike any other HTML document (e.g. the templates), `index.html` is compiled as
-a Grunt template, so variables from `Gruntfile.js` and `package.json` can be
-referenced from within it. Changing `name` in `package.json` from
-"fsReferenceClient" will rename the resultant CSS and JavaScript placed in `build/`,
-so this HTML references them by variable for convenience.

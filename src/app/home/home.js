@@ -9,104 +9,142 @@
         data: { pageTitle: 'Home' }
       });
     })
-    .controller('HomeController', function ($scope, $rootScope, fsCurrentUserCache, $firebase, $window, 
-      $q, FIREBASE_URL, fsApi, ftrUserChangesCache, $interval, ftrFindPersons, ftrPollingForChanges, FS_URL) {
+    .controller('HomeController', function (_, $scope, $rootScope, fsCurrentUserCache, $firebase, $window, 
+      $q, FIREBASE_URL, fsApi, $interval, ftrFindPersons, ftrPollingForChanges, FS_URL, ftrPersonChangesCache,
+      fsChangeUtils, ftrPersonsCache) {
 
       $scope.filterType = 'tree';
       $scope.requestedCount = 0;
+      $scope.unapprovedCount = 0;
       $scope.myChangesCount = 0;
       $scope.personUrl = FS_URL + '/tree/#view=ancestor&person=';
       $scope.changes = [];
-      $scope.scrollDisabled = true;
-      $scope.nextToLoad = 0;
   
       var rootRef = new $window.Firebase(FIREBASE_URL);
-
-      function loadChange(changeId) {
-        var deferred = $q.defer();
-
-        ftrUserChangesCache.getChange(changeId).then(function(change) {
-          $scope.changes.push(change);
-          deferred.resolve(change);          
-        });
-
-        return deferred.promise;
-      }
-
-      $scope.loadMore = function() {
-        if ($scope.loading) {
-          return;
-        }
-
-        $scope.loading = true;
-        var defer = $q.defer();
-        var promises = [];
-
-        console.log('loadMore, nextToLoad = ' + $scope.nextToLoad);
-
-        for (var i = 0; i < 10; i++) {
-          var index = $scope.nextToLoad + i;
-          if (index < $scope.userChanges.length) {
-            var promise = loadChange($scope.userChanges.$keyAt(index));
-            promises.push(promise);
-          }
-        }
-
-        $q.all(promises).then(function() {
-          $scope.nextToLoad += 10;
-          $scope.loading = false;
-        });
-
-        return defer;
-      };
-
-      function initialLoad() {
-        var defer = $q.defer();
-        var promises = [];
-        var count = $scope.userChanges.length < 10 ? $scope.userChanges.length : 10;
-        for (var i = 0; i < count; i++) {
-          var promise = loadChange($scope.userChanges.$keyAt(i));
-          promises.push(promise);
-        }
-
-        $q.all(promises).then(function() {
-          $scope.nextToLoad = 10;
-          $scope.scrollDisabled = false;
-        });
-
-        return defer;
-      }
 
       fsCurrentUserCache.getUser().then(function(user) {
         $rootScope.loggedInStatus = 'Logged in as ' + user.displayName;
         $scope.userDisplayName = user.displayName;
         $scope.agentId = user.treeUserId;
 
-        $scope.userChanges = $firebase(rootRef.child('/agents/' +$scope.agentId+ '/changes').orderByPriority()).$asArray();
+        $scope.userChanges = $firebase(rootRef.child('/users/' +$scope.agentId+ '/changes').orderByPriority()).$asArray();
+        $scope.userApprovals = $firebase(rootRef.child('/users/' +$scope.agentId+ '/approvals')).$asArray();
+        $scope.userReviewing = $firebase(rootRef.child('/users/' +$scope.agentId+ '/reviewing')).$asArray();
 
         $scope.userChanges.$loaded().then(function() {
-          $scope.userChangeCount = $scope.userChanges.length;
-          initialLoad();
           updateCounts();
+          buildViewList();
 
-          $scope.userChanges.$watch(function(event) {
-            if (event.event === 'child_added') {
+          $scope.userChanges.$watch(function() {
+            updateCounts();
+          });
+        });
 
-              var index = $scope.userChanges.$indexFor(event.key);
-              console.log('inserting change ' + event.key + ' at index ' + index);
+        $scope.userApprovals.$loaded().then(function() {
+          updateCounts();
+          $scope.userApprovals.$watch(function() {
+            updateCounts();
+          });
+        });
 
-              ftrUserChangesCache.getChange(event.key).then(function(change) {
-                $scope.changes.splice(index, 0, change);
-
-                if (index <= $scope.nextToLoad) {
-                  $scope.nextToLoad++;
-                }
-              });
-            }
+        $scope.userReviewing.$loaded().then(function() {
+          updateCounts();
+          $scope.userReviewing.$watch(function() {
+            updateCounts();
           });
         });
       }); 
 
+      function updateCounts() {
+        $scope.userChangeCount = $scope.userChanges.length;
+        $scope.unapprovedCount = $scope.userChanges.length - $scope.userApprovals.length;
+        $scope.requestedCount = $scope.userReviewing.length;
+
+        // $scope.myChangesCount = 0;
+        // angular.forEach($scope.changes, function(change) {
+        //   if (change.agentId === $scope.agentId) {
+        //     $scope.myChangesCount++;
+        //   }
+        // });
+      }
+
+      function buildViewList() {
+        for (var i = 0, len = $scope.userChanges.length; i < len; i++) {
+          updateViewItem(i, $scope.agentId, $scope.userChanges.$keyAt(i));
+        }         
+      }
+
+      function updateViewItem(index, userId, changeId) {
+        var globalChangeObj = $firebase(rootRef.child('/changes/' + changeId)).$asObject();
+        globalChangeObj.$loaded().then(function(globalChange) {
+          if (globalChange.subjectType === 'person') {
+            ftrPersonsCache.getPerson(globalChange.subjectId).then(function(person) {
+              ftrPersonChangesCache.getPersonChange(person.id, changeId).then(function(change) {
+
+                var reason = change.$getChangeReason();
+                if (!reason) {
+                  reason = '';
+                }
+                //var type = fsChangeUtils.getType(change);
+                var updatedDate = new Date(change.updated).toLocaleDateString();
+                var subjectDisplay = person.display.name;
+                var agentName = change.$getAgentName();
+
+                var agentUrl = change.$getAgentUrl();
+                var n = agentUrl.lastIndexOf('/');
+                var agentId = agentUrl.substring(n + 1);
+
+                var approved = false;
+                var approvalCount = 0;
+                angular.forEach(globalChange.approvals, function(value, key) {
+                  approvalCount++;
+                  if (key === userId) {
+                    approved = true;
+                  }
+                });
+
+                var reviewing = false;
+                angular.forEach(globalChange.reviewers, function(value, key) {
+                  if (key === userId) {
+                    reviewing = true;
+                  }
+                });
+
+                var viewItem = {
+                  id: change.id,
+                  index: index,
+                  title: change.title,
+                  subjectDisplay: subjectDisplay,
+                  agentName: agentName,
+                  agentId: agentId,
+                  updatedDate: updatedDate,
+                  reason: reason,
+                  approved: approved,
+                  approvalCount: approvalCount,
+                  reviewing: reviewing,
+                  comments: []
+                };
+
+                angular.forEach(globalChange.comments, function(comment) {
+
+                  var commentObj = {
+                    userId: comment.userId,
+                    by: comment.by,
+                    text: comment.text,
+                    t: comment.t
+                  };
+
+                  viewItem.comments.push(commentObj);
+                });
+
+                $scope.changes.push(viewItem);
+
+                globalChangeObj.$destroy();        
+              });
+            });
+          }
+        });
+      }
 
       $scope.filterType = 'tree';
 
@@ -116,16 +154,13 @@
 
       $scope.filterFunction = function(change) {
 
-        console.log('filtering ' + change.id );
-
         if ($scope.filterType === 'mine') {
           if (change.agentId === $scope.agentId) {
             return true;
           }
         }
         else if ($scope.filterType === 'unapproved') {
-          var userChange = $scope.userChanges.$getRecord(change.id);
-          if (userChange['approved'] === false) {
+          if (!change.approved) {
             return true;
           }
         }
@@ -136,60 +171,40 @@
         return false;
       };
 
-      function updateCounts() {
-        console.log('updateCounts');
-      } 
-      
-      $scope.isApproved = function(change) {
-        var userChange = $scope.userChanges.$getRecord(change.id);
+      $scope.approve = function(change, approveState) {
 
-        if (userChange['approved'] === true) {
-          return true;
+        var approvalsRef = rootRef.child('/changes/' + change.id + '/approvals/' + $scope.agentId);
+        var fbApprovalsRef = $firebase(approvalsRef);
+
+        var userApprovalsRef = rootRef.child('/users/' + $scope.agentId + '/approvals/' + change.id);
+        var fbUserApprovalsRef = $firebase(userApprovalsRef);
+
+        if (approveState === true) {
+          console.log('approved change ' + change.id);
+
+          change.approved = true;
+          change.approvalCount++;
+          fbApprovalsRef.$set(true);
+          fbUserApprovalsRef.$set(true);
         }
-        
-        return false;
-      };
+        else {
+          console.log('disapproved change ' + change.id);
 
-      $scope.approvalsCount = function(change) {
-        if (change.approvals) {
-          return Object.keys(change.approvals).length;
-        }
-
-        return 0;
-      };
-
-      $scope.approve = function(changeId, approveState) {
-
-        if (!!changeId) {
-          var approvalsRef = rootRef.child('/changes/' + changeId + '/approvals/' + $scope.agentId);
-          var fbApprovalsRef = $firebase(approvalsRef);
-
-          var userApprovalsRef = rootRef.child('/agents/' +$scope.agentId+ '/changes/' + changeId);
-          var fbUserApprovalsRef = $firebase(userApprovalsRef);
-
-          if (approveState === true) {
-            console.log('approved change ' + changeId);
-
-            fbApprovalsRef.$set(true);
-            fbUserApprovalsRef.$update({approved: true});
-          }
-          else {
-            console.log('disapproved change ' + changeId);
-
-            fbApprovalsRef.$remove();
-            fbUserApprovalsRef.$update({approved: false});
-          }
+          change.approved = false;
+          change.approvalCount--;
+          fbApprovalsRef.$remove();
+          fbUserApprovalsRef.$remove();
         }
       };
 
       $scope.addComment = function(change) {
 
-        console.log('comment text = ' + change.commentText);
+        console.log('adding comment \"' + change.commentText + '\" to change ' + change.id);
 
         if (change.commentText && change.commentText.length > 0) {
 
           var commentsRef = rootRef.child('/changes/' + change.id + '/comments');
-          var fbCommentsRef = $firebase(commentsRef).$asArray();
+          var fbCommentsRef = $firebase(commentsRef);
 
           var userName = $scope.userDisplayName;
 
@@ -200,30 +215,21 @@
             t: $window.Firebase.ServerValue.TIMESTAMP
           };
 
-          fbCommentsRef.$add(commentObj);
-          // if ('comments' in change) {
-          //   change.comments.push(commentObj);            
-          // }
-          // else {
-          //   change['comments'] = [];
-          //   change.comments.push(commentObj); 
-          // }
+          fbCommentsRef.$push(commentObj);
+
+          if ('comments' in change) {
+            change.comments.push(commentObj);  
+          }          
 
           change.commentText = '';
         }
       };
 
-      $scope.isRequested = function(change) {
-          if (change.requested === true) {
-            return true;
-          }
-
-          return false;
-      };
-
       $scope.requestReview = function(change, requestState) {
-          var changeRef = $firebase(rootRef.child('/changes/' + change.id));
-          var userChangeRef = $firebase(rootRef.child('/agents/' + $scope.agentId + '/changes/' + change.id));
+
+          var changeId = $scope.userChanges.$keyAt(change);
+          var changeRef = $firebase(rootRef.child('/changes/' + changeId));
+          var userChangeRef = $firebase(rootRef.child('/users/' + $scope.agentId + '/changes/' + changeId));
 
           if (requestState === true) {
             changeRef.$update({requested: true});
@@ -237,7 +243,7 @@
 
       $scope.pendingChanges = false;
 
-      ftrPollingForChanges.startPolling();
+      //ftrPollingForChanges.startPolling();
 
       $rootScope.$on('personChanged', function() {
         console.log('personChanged');

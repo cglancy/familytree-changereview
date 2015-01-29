@@ -9,7 +9,7 @@
           var rootRef = new $window.Firebase(FIREBASE_URL);
           var changesRef = rootRef.child('/changes');
           var fbChangesRef = $firebase(changesRef);          
-          var userChangesRef = rootRef.child('/agents/' + userId + '/changes');
+          var userChangesRef = rootRef.child('/users/' + userId + '/changes');
           //var fbUserChangesRef = $firebase(userChangesRef);
           
           fsApi.getPersonChanges(person.id).then(function(response) {
@@ -21,38 +21,15 @@
               var change = changes[i];
 
               if (ftrChangeUtils.isChangeOfInterest(change)) {
-                var reason = change.$getChangeReason();
-                if (!reason) {
-                  reason = '';
-                }
-                var type = fsChangeUtils.getType(change);
-                var updatedDate = new Date(change.updated).toLocaleDateString();
-                var subjectDisplay = person.display.name;
-                var agentName = change.$getAgentName();
-
-                var agentUrl = change.$getAgentUrl();
-                var n = agentUrl.lastIndexOf('/');
-                var agentId = agentUrl.substring(n + 1);
 
                 var changeObj = {
-                  id: change.id,
                   subjectType: 'person',
                   subjectId: person.id,
-                  updated: change.updated,
-                  title: change.title,
-                  type: type,
-                  subjectDisplay: subjectDisplay,
-                  agentName: agentName,
-                  agentId: agentId,
-                  updatedDate: updatedDate,
-                  reason: reason
+                  users: {}
                 };
 
-                // var userChangeObj = {
-                //   timestamp: Firebase.ServerValue.TIMESTAMP
-                // };
+                changeObj.users[userId] = true;
 
-                //fbUserChangesRef.$set(change.id, userChangeObj);
                 userChangesRef.child(change.id).setWithPriority(change.updated, -change.updated);
                 fbChangesRef.$update(change.id, changeObj);
               }
@@ -80,7 +57,7 @@
           }).then(function(response) {
 
             var personsRef = rootRef.child('/persons');
-            var userPersonsRef = rootRef.child('/agents/' + userId + '/persons');
+            var userPersonsRef = rootRef.child('/users/' + userId + '/persons');
 
             var persons = response.getPersons();
 
@@ -89,12 +66,8 @@
 
               // we must not display or store living persons
               if (!person.living) {
-
                 storePerson(userId, person.id, personsRef, userPersonsRef);
                 findPersonChanges(userId, person);
-              }
-              else {
-                console.log('Skipping living person ' + person.display.name);
               }
             }
           });
@@ -104,7 +77,7 @@
           
           var rootRef = new $window.Firebase(FIREBASE_URL);
           var personsRef = rootRef.child('/persons');
-          var userPersonsRef = rootRef.child('/agents/' + userId + '/persons');
+          var userPersonsRef = rootRef.child('/users/' + userId + '/persons');
           storePerson(userId, personId, personsRef, userPersonsRef);
 
           ftrPersonsCache.getPerson(personId).then(function(person) {

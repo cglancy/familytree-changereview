@@ -23,7 +23,7 @@
       function getChangedPersonIdsForUser(userId) {
 
         var rootRef = new $window.Firebase(FIREBASE_URL);
-        var userPersonsIds = $firebase(rootRef.child('/agents/' + userId + '/persons')).$asArray();
+        var userPersonsIds = $firebase(rootRef.child('/users/' + userId + '/persons')).$asArray();
 
         userPersonsIds.$loaded().then(function() {
           for (var i = 0, len = userPersonsIds.length; i < len; i++) {

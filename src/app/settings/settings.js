@@ -16,7 +16,7 @@
         fsCurrentUserCache.getUser().then(function(user) {
           $scope.agentId = user.treeUserId;
 
-          $scope.userPersonIds = $firebase(rootRef.child('/agents/' + $scope.agentId + '/persons')).$asArray();
+          $scope.userPersonIds = $firebase(rootRef.child('/users/' + $scope.agentId + '/persons')).$asArray();
           $scope.userPersonIds.$loaded(function() {
             $scope.personsCount = $scope.userPersonIds.length;
             getAllPersonDetails();

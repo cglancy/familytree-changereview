@@ -10,7 +10,7 @@
 
       fsCurrentUserCache.getUser().then(function(user) {
         userId = user.treeUserId;
-        userPersonIds = $firebase(rootRef.child('/agents/' + userId + '/persons')).$asArray();
+        userPersonIds = $firebase(rootRef.child('/users/' + userId + '/persons')).$asArray();
         userPersonIds.$loaded().then(function() {
           userPersonIds.$watch(function(event) {
             updatePersonChanges(event.key);

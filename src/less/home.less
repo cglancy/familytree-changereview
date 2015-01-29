@@ -22,8 +22,8 @@
   transform: translateY(-60px);
   -ms-transform: translateY(-60px);
   -webkit-transform: translateY(-60px);
-  transition-duration: 250ms;
-  -webkit-transition-duration: 250ms;
+  transition-duration: 500ms;
+  -webkit-transition-duration: 500ms;
   opacity: 0;
 }
 /* line 279, ../sass/ng-animation.scss */
@@ -38,8 +38,8 @@
   transform: translateY(0);
   -ms-transform: translateY(0);
   -webkit-transform: translateY(0);
-  transition-duration: 250ms;
-  -webkit-transition-duration: 250ms;
+  transition-duration: 500ms;
+  -webkit-transition-duration: 500ms;
   opacity: 1;
 }
 /* line 290, ../sass/ng-animation.scss */
@@ -54,8 +54,8 @@
   transform: translateY(0);
   -ms-transform: translateY(0);
   -webkit-transform: translateY(0);
-  transition-duration: 250ms;
-  -webkit-transition-duration: 250ms;
+  transition-duration: 500ms;
+  -webkit-transition-duration: 500ms;
   opacity: 1;
 }
 /* line 301, ../sass/ng-animation.scss */
@@ -70,8 +70,8 @@
   transform: translateY(-60px);
   -ms-transform: translateY(-60px);
   -webkit-transform: translateY(-60px);
-  transition-duration: 250ms;
-  -webkit-transition-duration: 250ms;
+  transition-duration: 500ms;
+  -webkit-transition-duration: 500ms;
   display: block !important;
   opacity: 0;
 }
@@ -164,5 +164,89 @@
   transform: perspective(300px) rotateX(0deg);
   -ms-transform: perspective(300px) rotateX(0deg);
   -webkit-transform: perspective(300px) rotateX(0deg);
+  opacity: 1;
+}
+
+/* ------------------------------------------- */
+/* Slide Rigth 
+/* ------------------------------------------- */
+/* line 163, ../sass/ng-animation.scss */
+.slide-right {
+  -webkit-transition: all 0 cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  -moz-transition: all 0 cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  -ms-transition: all 0 cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  -o-transition: all 0 cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition: all 0 cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  /* easeOutQuad */
+  -webkit-transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  -moz-transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  -ms-transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  -o-transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  /* easeOutQuad */
+}
+/* line 165, ../sass/ng-animation.scss */
+.slide-right.ng-enter {
+  transform: translateX(60px);
+  -ms-transform: translateX(60px);
+  -webkit-transform: translateX(60px);
+  transition-duration: 500ms;
+  -webkit-transition-duration: 500ms;
+  opacity: 0;
+}
+/* line 171, ../sass/ng-animation.scss */
+.slide-right.ng-enter-active {
+  transform: translateX(0);
+  -ms-transform: translateX(0);
+  -webkit-transform: translateX(0);
+  opacity: 1;
+}
+/* line 176, ../sass/ng-animation.scss */
+.slide-right.ng-leave {
+  transform: translateX(0);
+  -ms-transform: translateX(0);
+  -webkit-transform: translateX(0);
+  transition-duration: 500ms;
+  -webkit-transition-duration: 500ms;
+  opacity: 1;
+}
+/* line 182, ../sass/ng-animation.scss */
+.slide-right.ng-leave-active {
+  transform: translateX(60px);
+  -ms-transform: translateX(60px);
+  -webkit-transform: translateX(60px);
+  opacity: 0;
+}
+/* line 188, ../sass/ng-animation.scss */
+.slide-right.ng-hide-add {
+  transform: translateX(0);
+  -ms-transform: translateX(0);
+  -webkit-transform: translateX(0);
+  transition-duration: 500ms;
+  -webkit-transition-duration: 500ms;
+  opacity: 1;
+}
+/* line 193, ../sass/ng-animation.scss */
+.slide-right.ng-hide-add.ng-hide-add-active {
+  transform: translateX(60px);
+  -ms-transform: translateX(60px);
+  -webkit-transform: translateX(60px);
+  opacity: 0;
+}
+/* line 199, ../sass/ng-animation.scss */
+.slide-right.ng-hide-remove {
+  transform: translateX(60px);
+  -ms-transform: translateX(60px);
+  -webkit-transform: translateX(60px);
+  transition-duration: 500ms;
+  -webkit-transition-duration: 500ms;
+  display: block !important;
+  opacity: 0;
+}
+/* line 205, ../sass/ng-animation.scss */
+.slide-right.ng-hide-remove.ng-hide-remove-active {
+  transform: translateX(0);
+  -ms-transform: translateX(0);
+  -webkit-transform: translateX(0);
   opacity: 1;
 }
