@@ -22,6 +22,7 @@
             getAllPersonDetails();
             $scope.userPersonIds.$watch(function(event) {
               getPersonDetails(event.key);
+              $scope.personsCount = $scope.userPersonIds.length;
             });
           });
         });

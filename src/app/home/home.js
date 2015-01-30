@@ -55,30 +55,21 @@
         if (approveState === true) {
           console.log('approved change ' + change.id);
 
-          change.approved = true;
-          change.approvalCount++;
           approvalsRef.$set(true);
           userChangeRef.$update({approved: true});
         }
         else {
           console.log('disapproved change ' + change.id);
 
-          change.approved = false;
-          change.approvalCount--;
           approvalsRef.$remove();
           userChangeRef.$update({approved: false});
         }
+
+        ftrFeedLists.touchOtherWatchers(change.id);
       };
 
       $scope.approveAll = function() {
         ftrFeedLists.approveAll();
-        // angular.forEach($scope.unapprovedChangesList, function(change) {
-        //   change.approved = true;
-        //   var approvalsRef = $firebase(rootRef.child('/changes/' + change.id + '/approvals/' + $scope.userId));
-        //   var userChangeRef = $firebase(rootRef.child('/users/' + $scope.userId + '/changes/' + change.id));
-        //   approvalsRef.$set(true);
-        //   userChangeRef.$update({approved: true});
-        // });
       };
 
       $scope.addComment = function(change) {
@@ -98,9 +89,8 @@
 
           commentsRef.$push(commentObj);
 
-          if ('comments' in change) {
-            change.comments.push(commentObj);  
-          }          
+          ftrFeedLists.updateItem(change.id);         
+          ftrFeedLists.touchOtherWatchers(change.id);
 
           change.commentText = '';
         }
@@ -112,17 +102,15 @@
         var userChangeRef = $firebase(rootRef.child('/users/' + $scope.userId + '/changes/' + change.id));
 
         if (requestState === true) {
-
-          change.reviewing = true;
           reviewersRef.$set(true);
           userChangeRef.$update({reviewing: true});
         }
         else {
-
-          change.reviewing = false;
           reviewersRef.$remove();
           userChangeRef.$update({reviewing: false});
         }
+
+        ftrFeedLists.touchOtherWatchers(change.id);
       };
 
       $scope.pendingChanges = false;

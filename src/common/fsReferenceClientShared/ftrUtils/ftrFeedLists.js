@@ -1,7 +1,7 @@
 (function(){
   'use strict';
   angular.module('fsReferenceClientShared')
-  .factory('ftrFeedLists', function (_, $q, fsApi, fsCurrentUserCache, ftrPersonsCache, ftrPersonChangesCache, $window, $firebase, FIREBASE_URL) {
+  .factory('ftrFeedLists', function (_, $q, $interval, fsApi, fsCurrentUserCache, ftrPersonsCache, ftrPersonChangesCache, $window, $firebase, FIREBASE_URL) {
 
     var rootRef = new $window.Firebase(FIREBASE_URL);
     var userId;
@@ -24,21 +24,70 @@
 
     fsCurrentUserCache.getUser().then(function(user) {
       userId = user.treeUserId;
-      userChanges = $firebase(rootRef.child('/users/' + userId + '/changes').orderByPriority()).$asArray();
+      userChanges = $firebase(rootRef.child('/users/' + userId + '/changes').orderByChild('updated')).$asArray();
       userChanges.$loaded().then(function() {
 
         updateCounts();
         buildLists();
 
         userChanges.$watch(function(event) {
-          updateCounts();
-
-          if (event.key in itemsCache) {
-            updateChange(event.key);          
+          
+          if (event.event === 'child_changed') {
+            console.log('updating ' + event.key);
+            _updateItem(event.key);
+          }
+          else if (event.event === 'child_added') {
+            console.log('adding ' + event.key);
+            // this is causing data to be out of date with firebase
+            //addItem(event.key);
+          }
+          else if (event.event === 'child_removed') {
+            console.log('deleting ' + event.key);
+            delete itemsCache[event.key];
+            delayedUpdate();
+          }
+          else if (event.event === 'child_moved') {
+            console.log('child_moved!');
           }
         });
       });
     });
+
+    function _updateItem(changeId) {
+      if (changeId in itemsCache) {
+        getItem(userChanges.$getRecord(changeId)).then(function(newItem) {
+          var oldItem = itemsCache[changeId];
+          _.assign(oldItem, newItem);
+          delayedUpdate();
+        });
+      }
+    }
+
+    // function addItem(changeId) {
+    //   getItem(userChanges.$getRecord(changeId)).then(function(newItem) {
+    //     itemsCache[changeId] = newItem;
+    //     delayedUpdate();
+    //   });
+    // }
+
+    var timer;
+
+    function doUpdate() {
+      $interval.cancel(timer);
+      timer = undefined;
+      console.log('delayed update');
+      updateListsAndCounts();    
+    }
+
+    function delayedUpdate() {
+      if (angular.isDefined(timer)) {
+        $interval.cancel(timer);
+        timer = $interval(doUpdate, 500);
+      }
+      else {
+       timer = $interval(doUpdate, 500);
+      }
+    }
 
     function updateCounts() {
 
@@ -71,47 +120,74 @@
     }
 
     function updateListsAndCounts() {
+
+      console.log('updateListsAndCounts');
+
+      clearList(allChangesList);
       clearList(unapprovedChangesList);
       clearList(approvedChangesList);
       clearList(reviewChangesList);
       clearList(myChangesList);
 
       angular.forEach(itemsCache, function(item) {
-        if (item.approved) {
+
+        var userChange = userChanges.$getRecord(item.id);
+
+        allChangesList.push(item);
+
+        if (userChange.approved) {
           approvedChangesList.push(item);
         }
         else {
           unapprovedChangesList.push(item);
         }
 
-        if (item.reviewing) {
+        if (userChange.reviewing) {
           reviewChangesList.push(item);
         }
 
-        if (item.mine) {
+        if (userChange.mine) {
           myChangesList.push(item);
         }        
       });
 
-      countTotals.all = userChanges.length;
-      countTotals.approved = approvedChangesList.length;
-      countTotals.unapproved = unapprovedChangesList.length;      
-      countTotals.reviewing = reviewChangesList.length;
-      countTotals.mine = myChangesList.length;
+      updateCounts();
     }
 
     function buildLists() {
       angular.forEach(userChanges, function(userChange) {
-        loadItem(userChange);
+        getItem(userChange).then(function(viewItem) {
+
+          itemsCache[viewItem.id] = viewItem;
+
+          allChangesList.push(viewItem);
+
+          if (viewItem.approved) {
+            approvedChangesList.push(viewItem);
+          }
+          else {
+            unapprovedChangesList.push(viewItem);
+          }
+
+          if (viewItem.reviewing) {
+            reviewChangesList.push(viewItem);
+          }
+
+          if (viewItem.mine) {
+            myChangesList.push(viewItem);
+          } 
+        });
       });       
     }
 
-    function loadItem(userChange) {
+    function getItem(userChange) {
+      var deferred = $q.defer();
+
       var changeId = userChange.$id;
       var globalChangeRef = rootRef.child('/changes/' + changeId);
       globalChangeRef.once('value', function(snapshot) {
         var globalChange = snapshot.val();
-        if (globalChange.subjectType === 'person') {
+        if (globalChange && globalChange.subjectType === 'person') {
           ftrPersonsCache.getPerson(globalChange.subjectId).then(function(person) {
             ftrPersonChangesCache.getPersonChange(person.id, changeId).then(function(change) {
 
@@ -128,7 +204,10 @@
               var n = agentUrl.lastIndexOf('/');
               var agentId = agentUrl.substring(n + 1);
 
-              var approvalCount = globalChange.approvals ? globalChange.approvals.length : 0;
+              var approvalCount = 0;
+              angular.forEach(globalChange.approvals, function() {
+                approvalCount++;
+              });
 
               var viewItem = {
                 id: change.id,
@@ -158,48 +237,44 @@
                 viewItem.comments.push(commentObj);
               });
 
-              itemsCache[change.id] = viewItem;
-
-              allChangesList.push(viewItem);
-
-              if (viewItem.approved) {
-                approvedChangesList.push(viewItem);
-              }
-              else {
-                unapprovedChangesList.push(viewItem);
-              }
-
-              if (viewItem.reviewing) {
-                reviewChangesList.push(viewItem);
-              }
-
-              if (viewItem.agentId === userId) {
-                myChangesList.push(viewItem);
-              }
+              deferred.resolve(viewItem);
             });
           });
         }
       });
-    }
 
-    function updateChange(changeId) {
-      console.log('updating ' + changeId);
+      return deferred.promise;
     }
 
     function _approveAll() {
+      var promises = [];   
+        
       angular.forEach(userChanges, function(userChange) {
 
         var changeId = userChange.$id;
 
         if (!userChange.approved) {
-          userChange.approved = true;
-          if (changeId in itemsCache) {
-            itemsCache[changeId].approved = true;
-          }
           var approvalsUserRef = $firebase(rootRef.child('/changes/' + changeId + '/approvals/' + userId));
-          approvalsUserRef.$set(true);          
+          promises.push(approvalsUserRef.$set(true));          
           var userChangeRef = $firebase(rootRef.child('/users/' + userId + '/changes/' + changeId));
-          userChangeRef.$update({approved: true});
+          promises.push(userChangeRef.$update({approved: true}));
+        }
+      });
+
+      return $q.all(promises);
+    }
+
+    function _touchOtherWatchers(changeId) {
+      var changeUsersRef = rootRef.child('/changes/' + changeId + '/users');
+      changeUsersRef.once('value', function(snapshot) {
+        var users = snapshot.val();
+        if (users) {
+          angular.forEach(users, function(user, id) {
+            if (id !== userId) {
+              var userChangeRef = rootRef.child('/users/' + id + '/changes/' + changeId);
+              userChangeRef.update({updated: Firebase.ServerValue.TIMESTAMP});
+            }
+          });
         }
       });
     }
@@ -226,7 +301,12 @@
       },
       approveAll: function() {
         _approveAll();
-        updateListsAndCounts();
+      },
+      updateItem: function(changeId) {
+        _updateItem(changeId);
+      },
+      touchOtherWatchers: function(changeId) {
+        _touchOtherWatchers(changeId);
       }
     };
   });
