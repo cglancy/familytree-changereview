@@ -7,7 +7,7 @@
     var userId;
     var userChanges;
 
-    var changesCache = {};
+    var itemsCache = {};
     var allChangesList = [];
     var unapprovedChangesList = [];
     var approvedChangesList = [];
@@ -32,8 +32,8 @@
 
         userChanges.$watch(function(event) {
           updateCounts();
-          
-          if (event.key in changesCache) {
+
+          if (event.key in itemsCache) {
             updateChange(event.key);          
           }
         });
@@ -64,10 +64,46 @@
       });
     }
 
+    function clearList(list) {
+      while (list.length > 0) {
+        list.pop();
+      }      
+    }
+
+    function updateListsAndCounts() {
+      clearList(unapprovedChangesList);
+      clearList(approvedChangesList);
+      clearList(reviewChangesList);
+      clearList(myChangesList);
+
+      angular.forEach(itemsCache, function(item) {
+        if (item.approved) {
+          approvedChangesList.push(item);
+        }
+        else {
+          unapprovedChangesList.push(item);
+        }
+
+        if (item.reviewing) {
+          reviewChangesList.push(item);
+        }
+
+        if (item.mine) {
+          myChangesList.push(item);
+        }        
+      });
+
+      countTotals.all = userChanges.length;
+      countTotals.approved = approvedChangesList.length;
+      countTotals.unapproved = unapprovedChangesList.length;      
+      countTotals.reviewing = reviewChangesList.length;
+      countTotals.mine = myChangesList.length;
+    }
+
     function buildLists() {
-      for (var i = 0, len = userChanges.length; i < len; i++) {
-        loadItem(userChanges[i]);
-      }         
+      angular.forEach(userChanges, function(userChange) {
+        loadItem(userChange);
+      });       
     }
 
     function loadItem(userChange) {
@@ -94,11 +130,9 @@
 
               var approvalCount = globalChange.approvals ? globalChange.approvals.length : 0;
 
-              var order = userChange.touched ? -userChange.touched : -userChange.updated;
-
               var viewItem = {
                 id: change.id,
-                order: order,
+                order: -userChange.updated,
                 title: change.title,
                 subjectDisplay: subjectDisplay,
                 agentName: agentName,
@@ -123,6 +157,8 @@
 
                 viewItem.comments.push(commentObj);
               });
+
+              itemsCache[change.id] = viewItem;
 
               allChangesList.push(viewItem);
 
@@ -150,6 +186,24 @@
       console.log('updating ' + changeId);
     }
 
+    function _approveAll() {
+      angular.forEach(userChanges, function(userChange) {
+
+        var changeId = userChange.$id;
+
+        if (!userChange.approved) {
+          userChange.approved = true;
+          if (changeId in itemsCache) {
+            itemsCache[changeId].approved = true;
+          }
+          var approvalsUserRef = $firebase(rootRef.child('/changes/' + changeId + '/approvals/' + userId));
+          approvalsUserRef.$set(true);          
+          var userChangeRef = $firebase(rootRef.child('/users/' + userId + '/changes/' + changeId));
+          userChangeRef.$update({approved: true});
+        }
+      });
+    }
+
     return {
 
       getCountTotals: function() {
@@ -169,6 +223,10 @@
       },
       getMyChangesList: function() {
         return myChangesList;
+      },
+      approveAll: function() {
+        _approveAll();
+        updateListsAndCounts();
       }
     };
   });

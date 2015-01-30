@@ -33,7 +33,7 @@
 
       $scope.setFilter = function(filterType) {
         $scope.filterType = filterType;
-        
+
         switch(filterType) {
           case 'all':
             $scope.changes = $scope.allChangesList;
@@ -68,6 +68,17 @@
           approvalsRef.$remove();
           userChangeRef.$update({approved: false});
         }
+      };
+
+      $scope.approveAll = function() {
+        ftrFeedLists.approveAll();
+        // angular.forEach($scope.unapprovedChangesList, function(change) {
+        //   change.approved = true;
+        //   var approvalsRef = $firebase(rootRef.child('/changes/' + change.id + '/approvals/' + $scope.userId));
+        //   var userChangeRef = $firebase(rootRef.child('/users/' + $scope.userId + '/changes/' + change.id));
+        //   approvalsRef.$set(true);
+        //   userChangeRef.$update({approved: true});
+        // });
       };
 
       $scope.addComment = function(change) {
