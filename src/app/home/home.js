@@ -10,8 +10,7 @@
       });
     })
     .controller('HomeController', function (_, $scope, $rootScope, fsCurrentUserCache, $firebase, $window, 
-      $q, FIREBASE_URL, fsApi, $interval, ftrFindPersons, ftrPollingForChanges, FS_URL, ftrPersonChangesCache,
-      fsChangeUtils, ftrPersonsCache, ftrFeedLists) {
+      $q, FIREBASE_URL, fsApi, $interval, ftrFindPersons, ftrPollingForChanges, FS_URL, ftrFeedLists) {
 
       var rootRef = new $window.Firebase(FIREBASE_URL);
 
@@ -27,6 +26,7 @@
       $scope.countTotals = ftrFeedLists.getCountTotals();
       $scope.allChangesList = ftrFeedLists.getAllChangesList();
       $scope.unapprovedChangesList = ftrFeedLists.getUnapprovedChangesList();
+      $scope.reviewChangesList = ftrFeedLists.getReviewChangesList();
       $scope.myChangesList = ftrFeedLists.getMyChangesList();
 
       $scope.changes = $scope.allChangesList;
@@ -40,6 +40,9 @@
             break;
           case 'unapproved':
             $scope.changes = $scope.unapprovedChangesList;
+            break;
+          case 'review':
+            $scope.changes = $scope.reviewChangesList;
             break;
           case 'mine':
             $scope.changes = $scope.myChangesList;
