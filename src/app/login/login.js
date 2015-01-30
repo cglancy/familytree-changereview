@@ -9,7 +9,7 @@
       data: { pageTitle: 'Login' }
     });
   })
-  .controller('LoginController', function ($scope, $state, $rootScope, fsApi, fsCurrentUserCache, $window) {
+  .controller('LoginController', function ($scope, $state, $rootScope, fsApi, fsCurrentUserCache, $window, FIREBASE_URL) {
     $scope.signIn = function() {
       fsApi.getAccessToken().then(function() {
         $rootScope.$emit('newSession');
@@ -30,7 +30,7 @@
 
           console.log('Attempting to authenticate with email = ' + email);
 
-          var ref = new $window.Firebase('https://shining-heat-1351.firebaseio.com');
+          var ref = new $window.Firebase(FIREBASE_URL);
           ref.authWithPassword({
             email    : email,
             password : password
