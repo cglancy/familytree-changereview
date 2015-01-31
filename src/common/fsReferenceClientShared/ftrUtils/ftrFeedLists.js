@@ -1,7 +1,7 @@
 (function(){
   'use strict';
   angular.module('fsReferenceClientShared')
-  .factory('ftrFeedLists', function (_, $q, $interval, fsApi, fsCurrentUserCache, ftrPersonsCache, ftrPersonChangesCache, $window, $firebase, FIREBASE_URL) {
+  .factory('ftrFeedLists', function (_, $q, $interval, fsApi, fsCurrentUserCache, ftrPersonsCache, ftrPersonChangesCache, fsChangeUtils, $window, $firebase, FIREBASE_URL) {
 
     var rootRef = new $window.Firebase(FIREBASE_URL);
     var userId;
@@ -24,11 +24,11 @@
 
     fsCurrentUserCache.getUser().then(function(user) {
       userId = user.treeUserId;
-      userChanges = $firebase(rootRef.child('/users/' + userId + '/changes').orderByChild('updated')).$asArray();
+      userChanges = $firebase(rootRef.child('/users/' + userId + '/changes').orderByPriority()).$asArray();
       userChanges.$loaded().then(function() {
 
         updateCounts();
-        buildLists();
+        _loadList('all', 10);
 
         userChanges.$watch(function(event) {
           
@@ -38,8 +38,7 @@
           }
           else if (event.event === 'child_added') {
             console.log('adding ' + event.key);
-            // this is causing data to be out of date with firebase
-            //addItem(event.key);
+            addItem(event.key);
           }
           else if (event.event === 'child_removed') {
             console.log('deleting ' + event.key);
@@ -55,7 +54,7 @@
 
     function _updateItem(changeId) {
       if (changeId in itemsCache) {
-        getItem(userChanges.$getRecord(changeId)).then(function(newItem) {
+        loadItem(userChanges.$getRecord(changeId)).then(function(newItem) {
           var oldItem = itemsCache[changeId];
           _.assign(oldItem, newItem);
           delayedUpdate();
@@ -63,12 +62,12 @@
       }
     }
 
-    // function addItem(changeId) {
-    //   getItem(userChanges.$getRecord(changeId)).then(function(newItem) {
-    //     itemsCache[changeId] = newItem;
-    //     delayedUpdate();
-    //   });
-    // }
+    function addItem(changeId) {
+      loadItem(userChanges.$getRecord(changeId)).then(function(newItem) {
+        itemsCache[changeId] = newItem;
+        delayedUpdate();
+      });
+    }
 
     var timer;
 
@@ -154,33 +153,19 @@
       updateCounts();
     }
 
-    function buildLists() {
-      angular.forEach(userChanges, function(userChange) {
-        getItem(userChange).then(function(viewItem) {
+    // function getItem(userChange) {
+    //   var deferred = $q.defer();
+    //   if (userChange.$id in itemsCache) {
+    //     deferred.resolve(itemsCache[userChange.$id]);
+    //   }
+    //   else {
+    //     deferred.resolve(loadItem(userChange));
+    //   }
 
-          itemsCache[viewItem.id] = viewItem;
+    //   return deferred.promise;
+    // }
 
-          allChangesList.push(viewItem);
-
-          if (viewItem.approved) {
-            approvedChangesList.push(viewItem);
-          }
-          else {
-            unapprovedChangesList.push(viewItem);
-          }
-
-          if (viewItem.reviewing) {
-            reviewChangesList.push(viewItem);
-          }
-
-          if (viewItem.mine) {
-            myChangesList.push(viewItem);
-          } 
-        });
-      });       
-    }
-
-    function getItem(userChange) {
+    function loadItem(userChange) {
       var deferred = $q.defer();
 
       var changeId = userChange.$id;
@@ -195,7 +180,7 @@
               if (!reason) {
                 reason = '';
               }
-              //var type = fsChangeUtils.getType(change);
+
               var updatedDate = new Date(change.updated).toLocaleDateString();
               var subjectDisplay = person.display.name;
               var agentName = change.$getAgentName();
@@ -203,6 +188,10 @@
               var agentUrl = change.$getAgentUrl();
               var n = agentUrl.lastIndexOf('/');
               var agentId = agentUrl.substring(n + 1);
+
+              var typeStr = fsChangeUtils.getType(change);
+              n = typeStr.lastIndexOf('/');
+              var type = typeStr.substring(n + 1);
 
               var approvalCount = 0;
               angular.forEach(globalChange.approvals, function() {
@@ -213,6 +202,7 @@
                 id: change.id,
                 order: -userChange.updated,
                 title: change.title,
+                type: type,
                 subjectDisplay: subjectDisplay,
                 agentName: agentName,
                 agentId: agentId,
@@ -222,10 +212,13 @@
                 approvalCount: approvalCount,
                 reviewing: userChange.reviewing,
                 mine: userChange.mine,
+                commentCount: 0,
                 comments: []
               };
 
               angular.forEach(globalChange.comments, function(comment) {
+
+                viewItem.commentCount++;
 
                 var commentObj = {
                   userId: comment.userId,
@@ -273,8 +266,70 @@
             if (id !== userId) {
               var userChangeRef = rootRef.child('/users/' + id + '/changes/' + changeId);
               userChangeRef.update({updated: Firebase.ServerValue.TIMESTAMP});
+              // TODO: need to set priority!!
             }
           });
+        }
+      });
+    }
+
+    function loadListItem(userChange) {
+      var loadingItem = {
+        id: userChange.$id,
+        loading: true
+      };
+
+      itemsCache[userChange.$id] = loadingItem;
+
+      loadItem(userChange).then(function(item) {
+
+        itemsCache[item.id] = item;
+
+        allChangesList.push(item);
+
+        if (userChange.approved) {
+          approvedChangesList.push(item);
+        }
+        else {
+          unapprovedChangesList.push(item);
+        }
+
+        if (userChange.reviewing) {
+          reviewChangesList.push(item);
+        }
+
+        if (userChange.mine) {
+          myChangesList.push(item);
+        }
+      });
+    }
+
+    function _loadList(list, count) {
+
+      console.log('loading ' + count + ' items for the list = ' + list);
+
+      var loaded = 0;
+
+      angular.forEach(userChanges, function(userChange) {
+
+        if (!(userChange.$id in itemsCache) && loaded < count) {
+
+          if (!userChange.approved && list === 'unapproved') {
+            loaded++;
+            loadListItem(userChange);
+          }
+          else if (userChange.reviewing && list === 'review') {
+            loaded++;
+            loadListItem(userChange);
+          }
+          else if(userChange.mine && list === 'mine') {
+            loaded++;
+            loadListItem(userChange);
+          }
+          else {
+            loaded++;
+            loadListItem(userChange);         
+          }
         }
       });
     }
@@ -298,6 +353,9 @@
       },
       getMyChangesList: function() {
         return myChangesList;
+      },
+      loadList: function(list, count) {
+        _loadList(list, count);
       },
       approveAll: function() {
         _approveAll();

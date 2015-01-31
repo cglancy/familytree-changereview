@@ -50,6 +50,11 @@
         }
       };
 
+      $scope.loadMore = function() {
+        console.log('loadMore');
+        ftrFeedLists.loadList($scope.filterType, 5);
+      };
+
       $scope.approve = function(change, approveState) {
 
         var approvalsRef = $firebase(rootRef.child('/changes/' + change.id + '/approvals/' + $scope.userId));

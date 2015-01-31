@@ -51,7 +51,7 @@
                       mine: mine
                     };
 
-                    userChangesRef.child(change.id).set(changeObj);
+                    userChangesRef.child(change.id).setWithPriority(changeObj, -change.updated);
                   }
                 });
 
