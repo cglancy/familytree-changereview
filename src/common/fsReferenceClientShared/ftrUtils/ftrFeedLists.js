@@ -194,6 +194,7 @@
               var type = typeStr.substring(n + 1);
 
               var subjectUrl = ftrLocation.getPersonUrl(person.id);
+              var userUrl = ftrLocation.getUserUrl(agentId);
 
               var approvalCount = 0;
               angular.forEach(globalChange.approvals, function() {
@@ -209,6 +210,7 @@
                 subjectUrl: subjectUrl,
                 agentName: agentName,
                 agentId: agentId,
+                agentUrl: userUrl,
                 updatedDate: updatedDate,
                 reason: reason,
                 approved: userChange.approved,

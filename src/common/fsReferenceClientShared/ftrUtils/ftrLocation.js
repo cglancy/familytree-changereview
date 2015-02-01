@@ -59,23 +59,11 @@
           setParentsLocation: function(parentsId) {
             setLocation(locationFunctions.getParentsLocation(parentsId));
           },
-          getTreeUrl: function(personId,spouseId) {
-            return getUrl(locationFunctions.getTreeLocation(personId,spouseId));
+          getUserUrl: function(userId) {
+            return getUrl(locationFunctions.getUserLocation(userId));
           },
-          setTreeLocation: function(personId) {
-            setLocation(locationFunctions.getTreeLocation(personId));
-          },
-          getFindAddUrl: function(opts) {
-            return getUrl(locationFunctions.getFindAddLocation(opts));
-          },
-          setFindAddLocation: function(opts) {
-            setLocation(locationFunctions.getFindAddLocation(opts));
-          },
-          getSourceBoxUrl: function(opts) {
-            return getUrl(locationFunctions.getSourceBoxLocation(opts));
-          },
-          setSourceBoxLocation: function(opts) {
-            setLocation(locationFunctions.getSourceBoxLocation(opts));
+          setUserLocation: function(userId) {
+            setLocation(locationFunctions.getUserLocation(userId));
           }
         };
       };
