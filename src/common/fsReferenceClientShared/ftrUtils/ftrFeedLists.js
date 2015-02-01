@@ -1,7 +1,7 @@
 (function(){
   'use strict';
   angular.module('fsReferenceClientShared')
-  .factory('ftrFeedLists', function (_, $q, $interval, fsApi, fsCurrentUserCache, ftrPersonsCache, ftrPersonChangesCache, fsChangeUtils, $window, $firebase, FIREBASE_URL) {
+  .factory('ftrFeedLists', function (_, $q, $interval, fsApi, fsCurrentUserCache, ftrPersonsCache, ftrPersonChangesCache, ftrLocation, fsChangeUtils, $window, $firebase, FIREBASE_URL) {
 
     var rootRef = new $window.Firebase(FIREBASE_URL);
     var userId;
@@ -193,6 +193,8 @@
               n = typeStr.lastIndexOf('/');
               var type = typeStr.substring(n + 1);
 
+              var subjectUrl = ftrLocation.getPersonUrl(person.id);
+
               var approvalCount = 0;
               angular.forEach(globalChange.approvals, function() {
                 approvalCount++;
@@ -204,6 +206,7 @@
                 title: change.title,
                 type: type,
                 subjectDisplay: subjectDisplay,
+                subjectUrl: subjectUrl,
                 agentName: agentName,
                 agentId: agentId,
                 updatedDate: updatedDate,

@@ -26,7 +26,7 @@
 							<span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Approved
 					</button>
 
-					<h3 class="panel-title">{{change.title}} for <a href="{{personUrl + change.subjectId}}">{{change.subjectDisplay}}</a></h3>
+					<h3 class="panel-title">{{change.title}} for <a href="{{change.subjectUrl}}">{{change.subjectDisplay}}</a></h3>
 					<p>{{change.updatedDate}} by {{change.agentName}}</p>
 
 					<button type="button" class="btn btn-default pull-right" ng-show="!change.reviewing" ng-click="requestReview(change, true)"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Request Review</button>

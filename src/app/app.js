@@ -27,9 +27,9 @@
         .setRedirectUri('http://localhost:9000/#!/auth');
     })
 
-    .config(function(fsLocationProvider) {
+    .config(function(ftrLocationProvider) {
       var prefix = '/#';
-      fsLocationProvider.configure({
+      ftrLocationProvider.configure({
         getPersonLocation: function(personId) {
           return {
             prefix: prefix,
@@ -52,27 +52,6 @@
           return {
             prefix: prefix,
             path: '/parents/' + parentsId
-          };
-        },
-        getTreeLocation: function(personId, opts) {
-          return {
-            prefix: prefix,
-            path: '/tree/'+personId,
-            search: opts
-          };
-        },
-        getFindAddLocation: function(opts) {
-          return {
-            prefix: prefix,
-            path: '/find-add',
-            search: opts
-          };
-        },
-        getSourceBoxLocation: function(opts) {
-          return {
-            prefix: prefix,
-            path: '/source-box',
-            search: opts
           };
         }
       });
