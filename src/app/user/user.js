@@ -16,12 +16,29 @@
         }
       });
     })
-    .controller('UserController', function ($scope, user) {
+    .controller('UserController', function ($scope, $stateParams, user, ftrFeedLists, ftrChangeUtils) {
 
       $scope.user = user;
 
-      $scope.name = user.$getName();
-      $scope.accountName = user.$getAccountName();
-      $scope.email = user.$getEmail();
+      $scope.loadMore = function() {
+        ftrFeedLists.loadSubjectOrUserList(20);
+      };
+
+      console.log('user id = ' + $stateParams.userId);
+      $scope.changes = ftrFeedLists.getUserList($stateParams.userId);
+      $scope.loadMore();
+
+      $scope.approve = function(change, approveState) {
+        ftrChangeUtils.approve($scope.userId, change.id, approveState);
+      };
+
+      $scope.addComment = function(change) {
+        ftrChangeUtils.addComment($scope.userId, $scope.userDisplayName, change.id, change.commentText);
+        change.commentText = '';
+      };
+
+      $scope.requestReview = function(change, requestState) {
+        ftrChangeUtils.requestReview($scope.userId, change.id, requestState);
+      };  
     });
 })();

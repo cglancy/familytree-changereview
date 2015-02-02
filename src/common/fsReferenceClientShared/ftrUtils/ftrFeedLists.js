@@ -6,6 +6,8 @@
     var rootRef = new $window.Firebase(FIREBASE_URL);
     var userId;
     var userChanges;
+    var subjectIdFilter;
+    var userIdFilter;
 
     var itemsCache = {};
     var allChangesList = [];
@@ -13,6 +15,8 @@
     var approvedChangesList = [];
     var reviewChangesList = [];
     var myChangesList = [];
+    var subjectList = [];
+    var userList = [];
 
     var countTotals = {
       all: 0,
@@ -89,6 +93,10 @@
     }
 
     function updateCounts() {
+
+      if (!userChanges) {
+        return;
+      }
 
       countTotals.all = userChanges.length;
       countTotals.approved = 0;
@@ -206,6 +214,7 @@
                 order: -userChange.updated,
                 title: change.title,
                 type: type,
+                subjectId: globalChange.subjectId,
                 subjectDisplay: subjectDisplay,
                 subjectUrl: subjectUrl,
                 agentName: agentName,
@@ -262,50 +271,36 @@
       return $q.all(promises);
     }
 
-    function _touchOtherWatchers(changeId) {
-      var changeUsersRef = rootRef.child('/changes/' + changeId + '/users');
-      changeUsersRef.once('value', function(snapshot) {
-        var users = snapshot.val();
-        if (users) {
-          angular.forEach(users, function(user, id) {
-            if (id !== userId) {
-              var userChangeRef = rootRef.child('/users/' + id + '/changes/' + changeId);
-              userChangeRef.update({updated: Firebase.ServerValue.TIMESTAMP});
-              // TODO: need to set priority!!
-            }
-          });
-        }
-      });
-    }
-
     function loadListItem(userChange) {
       var loadingItem = {
         id: userChange.$id,
+        order: -userChange.updated,
         loading: true
       };
 
       itemsCache[userChange.$id] = loadingItem;
 
-      loadItem(userChange).then(function(item) {
+      allChangesList.push(loadingItem);
 
-        itemsCache[item.id] = item;
+      if (userChange.approved) {
+        approvedChangesList.push(loadingItem);
+      }
+      else {
+        unapprovedChangesList.push(loadingItem);
+      }
 
-        allChangesList.push(item);
+      if (userChange.reviewing) {
+        reviewChangesList.push(loadingItem);
+      }
 
-        if (userChange.approved) {
-          approvedChangesList.push(item);
-        }
-        else {
-          unapprovedChangesList.push(item);
-        }
+      if (userChange.mine) {
+        myChangesList.push(loadingItem);
+      }
 
-        if (userChange.reviewing) {
-          reviewChangesList.push(item);
-        }
+      loadItem(userChange).then(function(newItem) {
 
-        if (userChange.mine) {
-          myChangesList.push(item);
-        }
+        var oldItem = itemsCache[newItem.id];
+        _.assign(oldItem, newItem);
       });
     }
 
@@ -339,6 +334,65 @@
       });
     }
 
+    function updateSubjectList() {
+      clearList(subjectList);
+
+      angular.forEach(itemsCache, function(item) {
+        if (item.subjectId === subjectIdFilter) {
+          subjectList.push(item);
+        }
+      });
+    }
+
+    function updateUserList() {
+      clearList(userList);
+
+      angular.forEach(itemsCache, function(item) {
+        if (item.agentId === userIdFilter) {
+          userList.push(item);
+        }
+      });
+    }
+
+    function _loadSubjectOrUserList(count) {
+
+      console.log('loading ' + count + ' items for the user/subject list');
+
+      var loaded = 0;
+
+      angular.forEach(userChanges, function(userChange) {
+
+        if (!(userChange.$id in itemsCache) && loaded < count) {
+
+          loaded++;
+
+          var loadingItem = {
+            id: userChange.$id,
+            order: -userChange.updated,
+            loading: true
+          };
+
+          itemsCache[userChange.$id] = loadingItem;
+
+          loadItem(userChange).then(function(newItem) {
+
+            var oldItem = itemsCache[newItem.id];
+            _.assign(oldItem, newItem);
+
+            if (newItem.subjectId === subjectIdFilter) {
+              subjectList.push(newItem);
+            }
+
+            if (newItem.agentId === userIdFilter) {
+              userList.push(newItem);
+            }
+          });
+        }
+      });
+
+      updateListsAndCounts();
+    }
+
     return {
 
       getCountTotals: function() {
@@ -361,15 +415,25 @@
       },
       loadList: function(list, count) {
         _loadList(list, count);
+      },      
+      getSubjectList: function(subjectId) {
+        subjectIdFilter = subjectId;
+        updateSubjectList();
+        return subjectList;
+      },
+      loadSubjectOrUserList: function(count) {
+        return _loadSubjectOrUserList(count);
+      },
+      getUserList: function(userId) {
+        userIdFilter = userId;
+        updateUserList();
+        return userList;
       },
       approveAll: function() {
         _approveAll();
       },
       updateItem: function(changeId) {
         _updateItem(changeId);
-      },
-      touchOtherWatchers: function(changeId) {
-        _touchOtherWatchers(changeId);
       }
     };
   });

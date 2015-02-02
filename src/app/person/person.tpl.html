@@ -1,5 +1,53 @@
-<div class = "jumbotron">
-    <h3>{{person.display.name}}</h3>
-    <h5>{{person.display.lifespan}}</h5>
-    <h5>{{person.id}}</h5>
+<div class="row">
+  <div class="col-md-3">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h4>{{person.display.name}}</h4>
+        <h5>{{person.display.lifespan}}</h5>
+      </div>
+      <table class="table">
+        <tr>
+          <td>Family Tree ID:</td>
+          <td><a href="{{personUrl}}">{{person.id}}</a></td> 
+        </tr>
+      </table>
+    </div>
+  </div>
+  <div class="col-md-9">
+    <div infinite-scroll="loadMore()" infinite-scroll-distance="2" infinite-scroll-disabled="scrollDisabled">
+      <div ng-repeat="change in changes track by change.id | orderBy:'order'" class="panel panel-default panel-default">
+        <div class="panel-heading">
+          <button type="button" class="btn btn-default pull-right" ng-show="!change.approved" ng-click="approve(change, true)">
+              <span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Approve
+          </button>
+          <button type="button" class="btn btn-success pull-right ng-hide" ng-show="change.approved" ng-click="approve(change, false)">
+              <span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Approved
+          </button>
+
+          <h3 class="panel-title">{{change.title}} for {{change.subjectDisplay}}</h3>
+          <p>{{change.updatedDate}} by <a href="{{change.agentUrl}}">{{change.agentName}}</a></p>
+
+          <button type="button" class="btn btn-default pull-right" ng-show="!change.reviewing" ng-click="requestReview(change, true)"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Request Review</button>
+          <button type="button" class="btn btn-warning pull-right" ng-show="change.reviewing" ng-click="requestReview(change, false)"><span class="glyphicon glyphicon-ban-circle" aria-hidden="true"></span> Cancel Review</button>
+
+          <p>Reason: {{change.reason}}</p>        
+          <p>Number of approvals: {{change.approvalCount}}</p>
+
+        </div>
+        <div class="panel-body">
+          <ul class="list-group">
+            <li ng-repeat="comment in change.comments" class="list-group-item"><strong>{{comment.by}}:</strong> {{comment.text}}</li>
+          </ul>
+        </div>
+        <div class="panel-footer">
+            <div class="input-group">
+              <input type="text" class="form-control" placeholder="Add comment..." ng-model="change.commentText">
+              <span class="input-group-btn">
+                <button class="btn btn-default" type="button" ng-click="addComment(change)">Post</button>
+              </span>
+            </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
