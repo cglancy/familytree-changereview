@@ -26,10 +26,29 @@
       mine: 0
     };
 
+    function debugCheckOrder() {
+      var lastUpdated;
+      var lastPriority;
+      angular.forEach(userChanges, function(userChange) {
+        var updated = parseInt(userChange.updated, 10);
+        if (lastUpdated && lastUpdated < updated) {
+          console.log('Out of order at id = ', userChange.$id);
+        }
+        var priority = userChange.$priority;
+        if (lastPriority && lastPriority > priority) {
+          console.log('Priority out of order at id = ', userChange.$id);
+        }       
+        lastUpdated = updated;
+        lastPriority = priority;
+      });
+    }
+
     fsCurrentUserCache.getUser().then(function(user) {
       userId = user.treeUserId;
       userChanges = $firebase(rootRef.child('/users/' + userId + '/changes').orderByPriority()).$asArray();
       userChanges.$loaded().then(function() {
+
+        debugCheckOrder();
 
         updateCounts();
         _loadList('all', 10);
@@ -67,28 +86,72 @@
     }
 
     function addItem(changeId) {
-      loadItem(userChanges.$getRecord(changeId)).then(function(newItem) {
-        itemsCache[changeId] = newItem;
-        delayedUpdate();
+      console.log('starting addItem for ' + changeId);
+
+      var userChange = userChanges.$getRecord(changeId);
+      var loadingItem = {
+        id: changeId,
+        order: parseInt(-userChange.updated, 10),
+        loaded: false
+      };
+
+      itemsCache[changeId] = loadingItem;
+      delayedUpdate();
+      loadLater(changeId);
+    }
+
+    var loadTimer;
+    var loadList = [];
+
+    function doLoad() {
+      $interval.cancel(loadTimer);
+      loadTimer = undefined;
+
+      var workingList = loadList;
+      loadList = [];
+
+      angular.forEach(workingList, function(changeId) {
+        var userChange = userChanges.$getRecord(changeId);
+
+        loadItem(userChange).then(function(newItem) {
+          var oldItem = itemsCache[changeId];
+          _.assign(oldItem, newItem);
+          console.log('loadItem finished for ' + changeId);
+        },
+        function(error) {
+          console.log('loadItem failed for ' + changeId);
+          console.log(error);
+          loadLater(changeId);
+        });
       });
     }
 
-    var timer;
+    function loadLater(changeId) {
+      if (!(changeId in loadList)) {
+        loadList.push(changeId);        
+      }
+
+      if (!angular.isDefined(loadTimer)) {
+       loadTimer = $interval(doLoad, 1000);
+      }
+    }
+
+    var updateTimer;
 
     function doUpdate() {
-      $interval.cancel(timer);
-      timer = undefined;
+      $interval.cancel(updateTimer);
+      updateTimer = undefined;
       console.log('delayed update');
       updateListsAndCounts();    
     }
 
     function delayedUpdate() {
-      if (angular.isDefined(timer)) {
-        $interval.cancel(timer);
-        timer = $interval(doUpdate, 500);
+      if (angular.isDefined(updateTimer)) {
+        $interval.cancel(updateTimer);
+        updateTimer = $interval(doUpdate, 500);
       }
       else {
-       timer = $interval(doUpdate, 500);
+       updateTimer = $interval(doUpdate, 500);
       }
     }
 
@@ -126,6 +189,18 @@
       }      
     }
 
+    function itemSort(a, b) {
+      if (a.order > b.order) {
+        return 1;
+      }
+      else if (a.order < b.order) {
+        return -1;
+      }
+      else {
+        return 0;
+      }
+    }    
+
     function updateListsAndCounts() {
 
       console.log('updateListsAndCounts');
@@ -157,6 +232,12 @@
           myChangesList.push(item);
         }        
       });
+
+      allChangesList.sort(itemSort);
+      unapprovedChangesList.sort(itemSort);
+      approvedChangesList.sort(itemSort);
+      reviewChangesList.sort(itemSort);
+      myChangesList.sort(itemSort);
 
       updateCounts();
     }
@@ -211,7 +292,8 @@
 
               var viewItem = {
                 id: change.id,
-                order: -userChange.updated,
+                loaded: true,
+                order: parseInt(-userChange.updated, 10),
                 title: change.title,
                 type: type,
                 subjectId: globalChange.subjectId,
@@ -248,6 +330,15 @@
             });
           });
         }
+        else if (!globalChange) {
+          var msg = 'Global change is undefined';
+          console.log(msg);
+          deferred.reject(msg);
+        }
+      },
+      function(error) {
+        console.log('No global change for ' + changeId);
+        console.log(error);
       });
 
       return deferred.promise;
@@ -274,8 +365,8 @@
     function loadListItem(userChange) {
       var loadingItem = {
         id: userChange.$id,
-        order: -userChange.updated,
-        loading: true
+        order: parseInt(-userChange.updated, 10),
+        loaded: false
       };
 
       itemsCache[userChange.$id] = loadingItem;
@@ -342,6 +433,8 @@
           subjectList.push(item);
         }
       });
+
+      subjectList.sort(itemSort);
     }
 
     function updateUserList() {
@@ -352,6 +445,8 @@
           userList.push(item);
         }
       });
+
+      userList.sort(itemSort);
     }
 
     function _loadSubjectOrUserList(count) {
@@ -368,8 +463,8 @@
 
           var loadingItem = {
             id: userChange.$id,
-            order: -userChange.updated,
-            loading: true
+            order: parseInt(-userChange.updated, 10),
+            loaded: false
           };
 
           itemsCache[userChange.$id] = loadingItem;
@@ -390,6 +485,8 @@
         }
       });
 
+      subjectList.sort(itemSort);
+      userList.sort(itemSort);
       updateListsAndCounts();
     }
 

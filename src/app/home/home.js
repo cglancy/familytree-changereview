@@ -71,7 +71,7 @@
 
       $scope.pendingChanges = false;
 
-      //ftrPollingForChanges.startPolling();
+      ftrPollingForChanges.startPolling();
 
       $rootScope.$on('personChanged', function() {
         console.log('personChanged');

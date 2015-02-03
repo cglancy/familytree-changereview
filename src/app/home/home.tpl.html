@@ -17,7 +17,7 @@
 			</div>
 		</alert>
 		<div infinite-scroll="loadMore()" infinite-scroll-distance="2" infinite-scroll-disabled="scrollDisabled">
-			<div ng-repeat="change in changes track by change.id | orderBy:'order'" class="panel panel-default panel-default">
+			<div ng-repeat="change in changes track by change.id" class="panel panel-default panel-default">
 				<div class="panel-heading">
 					<button type="button" class="btn btn-default pull-right" ng-show="!change.approved" ng-click="approve(change, true)">
 							<span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Approve

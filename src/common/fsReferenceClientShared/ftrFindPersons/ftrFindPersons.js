@@ -2,16 +2,14 @@
   'use strict';
   angular.module('fsReferenceClientShared')
 
-    .factory('ftrFindPersons', function($q, fsApi, $window, $firebase, ftrUtils, FIREBASE_URL, fsChangeUtils, ftrChangeUtils, ftrPersonsCache) {
+    .factory('ftrFindPersons', function($q, fsApi, $window, $firebase, ftrUtils, FIREBASE_URL, fsChangeUtils, ftrChangeUtils) {
 
         var rootRef = new $window.Firebase(FIREBASE_URL);
 
-        function findPersonChanges(userId, person) {
+        function updatePersonChangesInFirebase(userId, personId) {
           
-          fsApi.getPersonChanges(person.id).then(function(response) {
-
+          fsApi.getPersonChanges(personId).then(function(response) {
             var changes = response.getChanges();
-
             angular.forEach(changes, function(change) {
 
               if (ftrChangeUtils.isChangeOfInterest(change)) {
@@ -22,7 +20,7 @@
                     // change does not yet exist
                     var changeObj = {
                       subjectType: 'person',
-                      subjectId: person.id,
+                      subjectId: personId,
                       users: {}
                     };
 
@@ -60,7 +58,7 @@
           });
         }
 
-        function storePerson(userId, personId) {
+        function updatePersonInFirebase(userId, personId) {
           var personsRef = rootRef.child('/persons');
           var userPersonsRef = rootRef.child('/users/' + userId + '/persons');
 
@@ -82,25 +80,19 @@
 
             var persons = response.getPersons();
 
-            for (var i = 0, len = persons.length; i < len; i++) {
-              var person = persons[i];
-
+            angular.forEach(persons, function(person) {
               // we must not display or store living persons
               if (!person.living) {
-                storePerson(userId, person.id);
-                findPersonChanges(userId, person);
+                updatePersonInFirebase(userId, person.id);
+                updatePersonChangesInFirebase(userId, person);
               }
-            }
+            });
           });
         },
 
         updatePerson: function(userId, personId) {
-
-          storePerson(userId, personId);
-
-          ftrPersonsCache.getPerson(personId).then(function(person) {
-            findPersonChanges(userId, person);
-          });
+          updatePersonInFirebase(userId, personId);
+          updatePersonChangesInFirebase(userId, personId);
         }
 
       };
