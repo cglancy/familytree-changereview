@@ -309,7 +309,8 @@
                 reviewing: userChange.reviewing,
                 mine: userChange.mine,
                 commentCount: 0,
-                comments: []
+                comments: [],
+                reviewers: []
               };
 
               angular.forEach(globalChange.comments, function(comment) {

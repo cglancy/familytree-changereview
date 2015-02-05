@@ -1,33 +1,61 @@
 (function(){
   'use strict';
   angular.module('fsReferenceClientShared')
-    .factory('ftrReviewerList', function ($q, fsApi, FIREBASE_URL, $firebase, $window, ftrAgentsCache) {
+    .factory('ftrReviewerList', function ($q, fsApi, FIREBASE_URL, $firebase, $window, ftrAgentsCache, fsCurrentUserCache) {
 
       var rootRef = new $window.Firebase(FIREBASE_URL);
+
+      function readUsers() {
+        var deferred = $q.defer();
+        var usersRef = rootRef.child('users');
+        usersRef.once('value', function(snapshot) {
+          var users = snapshot.val();
+          deferred.resolve(users);
+        });
+        return deferred.promise;
+      }
+
+      function getAgentData(userId, users) {
+        var deferred = $q.defer();
+        var promises = [];
+        var list = [];
+
+        angular.forEach(users, function(user, key) {
+          if (userId !== key) {
+            promises.push(ftrAgentsCache.getAgent(key).then(function(agent) {
+              var name = agent.$getName();
+              if (!name) {
+                name = agent.$getAccountName();
+                if (!name) {
+                  name = key;
+                }
+              }
+              list.push({userId: key, name: name});
+            }));
+          }
+        });
+
+        $q.all(promises).then(function() {
+          deferred.resolve(list);              
+        });          
+
+        return deferred.promise;
+      }
 
       return {
         getList: function() {
           var deferred = $q.defer();
-          var promises = [];
-          var list = [];
 
-          var users = $firebase(rootRef.child('users')).$asObject();
-          users.$loaded().then(function() {
-            angular.forEach(users, function(user, key) {
-              if (user.reviewer) {
-                promises.push(ftrAgentsCache.getAgent(key).then(function(agent) {
-                  var name = agent.$getAccountName();
-                  list.push({userId: key, name: name});
-                }));
-              }
+          fsCurrentUserCache.getUser().then(function(user) {
+            var userId = user.treeUserId;
+            readUsers().then(function(users) {
+              getAgentData(userId, users).then(function(list) {
+                deferred.resolve(list);
+              });
             });
           });
 
-          $q.all(promises).then(function() {
-            deferred.resolve(list);              
-          });          
-
-          return deferred;
+          return deferred.promise;
         }
 
       };

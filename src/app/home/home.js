@@ -10,7 +10,7 @@
       });
     })
     .controller('HomeController', function ($scope, $rootScope, fsCurrentUserCache, 
-      ftrFindPersons, ftrPollingForChanges, ftrFeedLists, ftrChangeUtils) {
+      ftrFindPersons, ftrPollingForChanges, ftrFeedLists, ftrChangeUtils, ftrReviewerList) {
 
       fsCurrentUserCache.getUser().then(function(user) {
         $scope.userDisplayName = user.displayName;
@@ -27,6 +27,9 @@
       $scope.myChangesList = ftrFeedLists.getMyChangesList();
 
       $scope.changes = $scope.allChangesList;
+
+      $scope.reviewerList2 = ftrReviewerList.getList();
+      $scope.reviewerList = [{userId:0, name:'User1'}, {userId:1, name:'User2'}, {userId:2, name:'User3'}];
 
       $scope.setFilter = function(filterType) {
         $scope.filterType = filterType;
@@ -63,6 +66,24 @@
       $scope.addComment = function(change) {
         ftrChangeUtils.addComment($scope.userId, $scope.userDisplayName, change.id, change.commentText);
         change.commentText = '';
+      };
+
+      $scope.onReviewerSelect = function (change, item) {
+        console.log('onReviewerSelect', item);
+
+        if (item) {
+          change.reviewers.push(item);
+        }
+
+        change.reviewerText = '';
+      };
+
+      $scope.addReviewer = function(change) {
+        if (change.reviewerText && change.reviewerText.length) {
+          change.reviewers.push(change.reviewerText);
+        }
+
+        change.reviewerText = '';
       };
 
       $scope.requestReview = function(change, requestState) {

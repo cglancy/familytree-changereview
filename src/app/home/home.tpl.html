@@ -3,7 +3,7 @@
 		<div class="btn-group-vertical filter-buttons" role="group" aria-label="...">
 				<button type="button" class="btn btn-default" ng-click="setFilter('all')">All Changes <span class="badge">{{countTotals.all}}</span></button>
 				<button type="button" class="btn btn-default" ng-click="setFilter('unapproved')">Unapproved <span class="badge">{{countTotals.unapproved}}</span></button>
-				<button type="button" class="btn btn-default" ng-click="setFilter('review')">For My Review <span class="badge">{{countTotals.reviewing}}</span></button>
+				<button type="button" class="btn btn-default" ng-click="setFilter('review')">My Reviews <span class="badge">{{countTotals.reviewing}}</span></button>
 				<button type="button" class="btn btn-default" ng-click="setFilter('mine')">My Changes <span class="badge">{{countTotals.mine}}</span></button>
 		</div>
 		<div class="btn-toolbar filter-buttons">
@@ -19,30 +19,48 @@
 		<div infinite-scroll="loadMore()" infinite-scroll-distance="2" infinite-scroll-disabled="scrollDisabled">
 			<div ng-repeat="change in changes track by change.id" class="panel panel-default panel-default">
 				<div class="panel-heading">
-					<button type="button" class="btn btn-default pull-right" ng-show="!change.approved" ng-click="approve(change, true)">
-							<span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Approve
-					</button>
-					<button type="button" class="btn btn-success pull-right ng-hide" ng-show="change.approved" ng-click="approve(change, false)">
-							<span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Approved
-					</button>
-
-					<h3 class="panel-title">{{change.title}} for <a href="{{change.subjectUrl}}">{{change.subjectDisplay}}</a></h3>
-					<p>{{change.updatedDate}} by <a href="{{change.agentUrl}}">{{change.agentName}}</a></p>
-
-					<button type="button" class="btn btn-default pull-right" ng-show="!change.reviewing" ng-click="requestReview(change, true)"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Request Review</button>
-					<button type="button" class="btn btn-warning pull-right" ng-show="change.reviewing" ng-click="requestReview(change, false)"><span class="glyphicon glyphicon-ban-circle" aria-hidden="true"></span> Cancel Review</button>
-
-					<p>Reason: {{change.reason}}</p>				
-					<p>Number of approvals: {{change.approvalCount}}</p>
-
+					<div ng-show="!change.loaded">
+						<h3><i class="fa fa-spinner fa-spin"></i></h3>
+					</div>
+					<div class="row" ng-show="change.loaded">
+						<div class="col-md-10">
+							<h3 class="panel-title">{{change.title}} for <a href="{{change.subjectUrl}}">{{change.subjectDisplay}}</a></h3>
+							<p>{{change.updatedDate}} by <a href="{{change.agentUrl}}">{{change.agentName}}</a></p>	
+						</div>
+						<div class="col-md-2">
+							<div class="text-right">
+							<span class="glyphicon glyphicon-comment" aria-hidden="true"></span> {{change.commentCount}} <span class="glyphicon glyphicon-ok" aria-hidden="true"></span> {{change.approvalCount}}
+							</div>
+						</div>
+					</div>
 				</div>
-				<div class="panel-body">
-					<ul class="list-group">
-						<li ng-repeat="comment in change.comments" class="list-group-item"><strong>{{comment.by}}:</strong> {{comment.text}}</li>
-					</ul>
+				<div class="panel-body">	
+					<div class="row" ng-show="change.loaded">
+						<div class="col-md-8">
+							<p>Reason: {{change.reason}}</p>
+						</div>
+						<div class="col-md-4">
+							<button type="button" class="btn btn-default pull-right" ng-show="!change.approved && !change.mine" ng-click="approve(change, true)">
+									<span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Approve
+							</button>
+							<button type="button" class="btn btn-success pull-right" ng-show="change.approved && !change.mine" ng-click="approve(change, false)">
+									<span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Approved
+							</button>
+
+							<div ng-show="change.mine">
+						    	<input type="text" class="form-control" placeholder="Add reviewer..." ng-model="change.reviewerText" typeahead="reviewer as reviewer.name for reviewer in reviewerList | filter:{name:$viewValue} | limitTo:8" typeahead-editable="false" typeahead-on-select='onReviewerSelect(change, $item)'>
+						    </div>
+							<ul class="list-group">
+								<li ng-repeat="reviewer in change.reviewers" class="list-group-item">{{reviewer.name}}</li>
+							</ul>					
+						</div>
+					</div>
 				</div>
 				<div class="panel-footer">
-				    <div class="input-group">
+					<ul class="list-group">
+						<li ng-repeat="comment in change.comments" class="list-group-item"><strong>{{comment.by}}:</strong> {{comment.text}}</li>
+					</ul>				    
+					<div class="input-group">
 				    	<input type="text" class="form-control" placeholder="Add comment..." ng-model="change.commentText">
 				    	<span class="input-group-btn">
 				    		<button class="btn btn-default" type="button" ng-click="addComment(change)">Post</button>

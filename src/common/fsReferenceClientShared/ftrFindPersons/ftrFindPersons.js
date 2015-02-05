@@ -28,6 +28,13 @@
 
                     globalChangesRef.child(change.id).set(changeObj);
                   }
+                  else {
+                    // change exists
+                    var usersObj = {};
+                    usersObj[userId] = true;
+
+                    globalChangesRef.child(change.id).child('users').update(usersObj);                    
+                  }
                 });
 
                 var userChangesRef = rootRef.child('/users/' + userId + '/changes');
@@ -84,7 +91,7 @@
               // we must not display or store living persons
               if (!person.living) {
                 updatePersonInFirebase(userId, person.id);
-                updatePersonChangesInFirebase(userId, person);
+                updatePersonChangesInFirebase(userId, person.id);
               }
             });
           });
