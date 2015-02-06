@@ -1,10 +1,9 @@
 <div class="row">
 	<div class="col-md-3">
 		<div class="btn-group-vertical filter-buttons" role="group" aria-label="...">
-				<button type="button" class="btn btn-default" ng-click="setFilter('all')">All Changes <span class="badge">{{countTotals.all}}</span></button>
-				<button type="button" class="btn btn-default" ng-click="setFilter('unapproved')">Unapproved <span class="badge">{{countTotals.unapproved}}</span></button>
-				<button type="button" class="btn btn-default" ng-click="setFilter('review')">My Reviews <span class="badge">{{countTotals.reviewing}}</span></button>
-				<button type="button" class="btn btn-default" ng-click="setFilter('mine')">My Changes <span class="badge">{{countTotals.mine}}</span></button>
+				<button type="button" class="btn btn-default" ng-class="{active:filterType==='review'}" ng-click="setFilter('review')">My Reviews <span class="badge">{{countTotals.reviewing}}</span></button>
+				<button type="button" class="btn btn-default" ng-class="{active:filterType==='mine'}" ng-click="setFilter('mine')">My Changes <span class="badge">{{countTotals.mine}}</span></button>
+				<button type="button" class="btn btn-default" ng-class="{active:filterType==='all'}" ng-click="setFilter('all')">All Changes <span class="badge">{{countTotals.all}}</span></button>
 		</div>
 		<div class="btn-toolbar filter-buttons">
 				<button type="button" class="btn btn-default" ng-show="filterType === 'unapproved'" ng-click="approveAll()"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Mark All Approved</button>
@@ -40,14 +39,14 @@
 							<p>Reason: {{change.reason}}</p>
 						</div>
 						<div class="col-md-4">
-							<button type="button" class="btn btn-default pull-right" ng-show="!change.approved && !change.mine" ng-click="approve(change, true)">
+							<button type="button" class="btn btn-default pull-right" ng-show="change.state === 'reviewing'" ng-click="approve(change, true)">
 									<span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Approve
 							</button>
-							<button type="button" class="btn btn-success pull-right" ng-show="change.approved && !change.mine" ng-click="approve(change, false)">
+							<button type="button" class="btn btn-success pull-right" ng-show="change.state === 'approved'" ng-click="approve(change, false)">
 									<span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Approved
 							</button>
 
-							<div ng-show="change.mine">
+							<div ng-show="change.state === 'mine'">
 						    	<input type="text" class="form-control" placeholder="Add reviewer..." ng-model="change.reviewerText" typeahead="reviewer as reviewer.name for reviewer in reviewerList | filter:{name:$viewValue} | limitTo:8" typeahead-editable="false" typeahead-on-select='onReviewerSelect(change, $item)'>
 						    </div>
 							<ul class="list-group">

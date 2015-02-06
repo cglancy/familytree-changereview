@@ -1,7 +1,7 @@
 (function(){
   'use strict';
   angular.module('fsReferenceClientShared')
-    .factory('ftrChangeUtils', function (fsApi, fsChangeUtils, $window, $firebase, FIREBASE_URL, ftrFeedLists) {
+    .factory('ftrChangeUtils', function (fsApi, fsChangeUtils, $window, $firebase, FIREBASE_URL, ftrFeedLists, ftrFirebaseUtils) {
 
       var factory = {};
 
@@ -86,7 +86,7 @@
         return interested;
       };
 
-      function _touchOtherWatchers(userId, changeId) {
+      function _touchOtherWatchers(userId, changeId, timestamp) {
         var changeUsersRef = rootRef.child('/changes/' + changeId + '/users');
         changeUsersRef.once('value', function(snapshot) {
           var users = snapshot.val();
@@ -94,16 +94,32 @@
             angular.forEach(users, function(user, id) {
               if (id !== userId) {
                 var userChangeRef = rootRef.child('/users/' + id + '/changes/' + changeId);
-                userChangeRef.update({updated: Firebase.ServerValue.TIMESTAMP});
-                // TODO: need to set priority!!
+                userChangeRef.update({updated: timestamp});
+                userChangeRef.setPriority(-timestamp);
               }
             });
           }
         });
+
+        var changeReviewersRef = rootRef.child('/changes/' + changeId + '/reviewers');
+        changeReviewersRef.once('value', function(snapshot) {
+          var users = snapshot.val();
+          if (users) {
+            angular.forEach(users, function(user, id) {
+              if (id !== userId) {
+                var userChangeRef = rootRef.child('/users/' + id + '/changes/' + changeId);
+                userChangeRef.update({updated: timestamp});
+                userChangeRef.setPriority(-timestamp);
+              }
+            });
+          }
+        });      
       }
 
       factory.touchOtherWatchers = function(userId, changeId) {
-        _touchOtherWatchers(userId, changeId);
+        ftrFirebaseUtils.getServerTimestamp().then(function(timestamp) {
+          _touchOtherWatchers(userId, changeId, timestamp);          
+        });
       };
 
       factory.approve = function(userId, changeId, approveState) {
@@ -115,13 +131,13 @@
           console.log('approved change ' + changeId);
 
           approvalsRef.$set(true);
-          userChangeRef.$update({approved: true});
+          userChangeRef.$update({state: 'approved'});
         }
         else {
           console.log('disapproved change ' + changeId);
 
           approvalsRef.$remove();
-          userChangeRef.$update({approved: false});
+          userChangeRef.$update({state: 'reviewing'});
         }
 
         _touchOtherWatchers(changeId);
@@ -147,6 +163,24 @@
           ftrFeedLists.updateItem(changeId);         
           _touchOtherWatchers(changeId);
         }
+      };
+
+      factory.addReviewer = function(changeId, reviewerId) {
+        var reviewersRef = $firebase(rootRef.child('/changes/' + changeId + '/reviewers/' + reviewerId));
+        var userChangeRef = rootRef.child('/users/' + reviewerId + '/changes/' + changeId);
+
+        reviewersRef.$set(true);
+        userChangeRef.setWithPriority({updated: '', state: 'reviewing'}, 0);
+        _touchOtherWatchers(changeId);
+      };
+
+      factory.removeReviewer = function(changeId, reviewerId) {
+        var reviewersRef = $firebase(rootRef.child('/changes/' + changeId + '/reviewers/' + reviewerId));
+        var userChangeRef = $firebase(rootRef.child('/users/' + reviewerId + '/changes/' + changeId));
+
+        reviewersRef.$remove();
+        userChangeRef.$update({state: ''});
+        _touchOtherWatchers(changeId);
       };
 
       factory.requestReview = function(userId, changeId, requestState) {

@@ -47,13 +47,14 @@
                     var n = agentUrl.lastIndexOf('/');
                     var agentId = agentUrl.substring(n + 1);
 
-                    var mine = agentId === userId;
+                    var state = 'reviewing';
+                    if (agentId === userId) {
+                      state = 'mine';
+                    }
 
                     var changeObj = {
                       updated: change.updated,
-                      approved: false,
-                      reviewing: false,
-                      mine: mine
+                      state: state
                     };
 
                     userChangesRef.child(change.id).setWithPriority(changeObj, -change.updated);

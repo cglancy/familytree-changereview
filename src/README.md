@@ -7,15 +7,11 @@ production/
   |- users/
   |  |- uid1/
   |  |- uid2/
-  |  |  |- presence: online
-  |  |  |- reviewer: true
   |  |  |- changes/
   |  |  |  |- cid1/
   |  |  |  |- cid2/
   |  |  |    |- updated: timestamp
-  |  |  |    |- reviewing: true
-  |  |  |    |- approved: false
-  |  |  |    |- mine: true
+  |  |  |    |- state: ['mine', 'reviewing', 'approved']
   |  |  |- persons/
   |  |  |  |- pid1: fs-timestamp
   |  |  |  |- pid2: fs-timestamp  

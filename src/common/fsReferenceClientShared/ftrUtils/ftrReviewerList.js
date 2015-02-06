@@ -30,7 +30,11 @@
                   name = key;
                 }
               }
-              list.push({userId: key, name: name});
+              var email = agent.$getEmail();
+              if (!email) {
+                email = '';
+              }
+              list.push({userId: key, name: name, email:email});
             }));
           }
         });

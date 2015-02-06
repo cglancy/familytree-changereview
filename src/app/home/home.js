@@ -17,43 +17,48 @@
         $scope.userId = user.treeUserId;
       });
 
-      $scope.filterType = 'all';
+      $scope.filterType = 'review';
       $scope.changes = [];
 
       $scope.countTotals = ftrFeedLists.getCountTotals();
       $scope.allChangesList = ftrFeedLists.getAllChangesList();
-      $scope.unapprovedChangesList = ftrFeedLists.getUnapprovedChangesList();
       $scope.reviewChangesList = ftrFeedLists.getReviewChangesList();
       $scope.myChangesList = ftrFeedLists.getMyChangesList();
-
-      $scope.changes = $scope.allChangesList;
-
-      $scope.reviewerList2 = ftrReviewerList.getList();
-      $scope.reviewerList = [{userId:0, name:'User1'}, {userId:1, name:'User2'}, {userId:2, name:'User3'}];
 
       $scope.setFilter = function(filterType) {
         $scope.filterType = filterType;
 
         switch(filterType) {
-          case 'all':
-            $scope.changes = $scope.allChangesList;
-            break;
-          case 'unapproved':
-            $scope.changes = $scope.unapprovedChangesList;
-            break;
           case 'review':
             $scope.changes = $scope.reviewChangesList;
             break;
           case 'mine':
             $scope.changes = $scope.myChangesList;
             break;
+          case 'all':
+            $scope.changes = $scope.allChangesList;
+            break;
         }
-      };
 
+        $scope.loadMore();
+      };
+      
       $scope.loadMore = function() {
         console.log('loadMore');
         ftrFeedLists.loadList($scope.filterType, 5);
       };
+
+      $scope.setFilter($scope.filterType);
+
+      ftrReviewerList.getList().then(function(list) {
+        $scope.reviewerList0 = list;
+      });
+
+      $scope.reviewerList = [
+        {userId:0, name:'Erv Bushke', email: 'null@example.com'}, 
+        {userId:1, name:'Elmer Fudd', email: 'null@example.com'},
+        {userId:2, name:'Edwin Moses', email: 'null@example.com'}
+      ];
 
       $scope.approve = function(change, approveState) {
         ftrChangeUtils.approve($scope.userId, change.id, approveState);
@@ -73,14 +78,6 @@
 
         if (item) {
           change.reviewers.push(item);
-        }
-
-        change.reviewerText = '';
-      };
-
-      $scope.addReviewer = function(change) {
-        if (change.reviewerText && change.reviewerText.length) {
-          change.reviewers.push(change.reviewerText);
         }
 
         change.reviewerText = '';

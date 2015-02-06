@@ -11,8 +11,6 @@
 
     var itemsCache = {};
     var allChangesList = [];
-    var unapprovedChangesList = [];
-    var approvedChangesList = [];
     var reviewChangesList = [];
     var myChangesList = [];
     var subjectList = [];
@@ -20,8 +18,6 @@
 
     var countTotals = {
       all: 0,
-      approved: 0,
-      unapproved: 0,
       reviewing: 0,
       mine: 0
     };
@@ -162,22 +158,14 @@
       }
 
       countTotals.all = userChanges.length;
-      countTotals.approved = 0;
-      countTotals.unapproved = userChanges.length;      
       countTotals.reviewing = 0;
       countTotals.mine = 0;
 
       angular.forEach(userChanges, function(userChange) {
-        if (userChange.approved) {
-          countTotals.approved++;
-          countTotals.unapproved--;
-        }
-
-        if (userChange.reviewing) {
+        if (userChange.state === 'reviewing') {
           countTotals.reviewing++;
         }
-
-        if (userChange.mine) {
+        else if (userChange.state === 'mine') {
           countTotals.mine++;
         }
       });
@@ -206,8 +194,6 @@
       console.log('updateListsAndCounts');
 
       clearList(allChangesList);
-      clearList(unapprovedChangesList);
-      clearList(approvedChangesList);
       clearList(reviewChangesList);
       clearList(myChangesList);
 
@@ -217,25 +203,15 @@
 
         allChangesList.push(item);
 
-        if (userChange.approved) {
-          approvedChangesList.push(item);
-        }
-        else {
-          unapprovedChangesList.push(item);
-        }
-
-        if (userChange.reviewing) {
+        if (userChange.state === 'reviewing') {
           reviewChangesList.push(item);
         }
-
-        if (userChange.mine) {
+        else if (userChange.state === 'mine') {
           myChangesList.push(item);
         }        
       });
 
       allChangesList.sort(itemSort);
-      unapprovedChangesList.sort(itemSort);
-      approvedChangesList.sort(itemSort);
       reviewChangesList.sort(itemSort);
       myChangesList.sort(itemSort);
 
@@ -304,10 +280,8 @@
                 agentUrl: userUrl,
                 updatedDate: updatedDate,
                 reason: reason,
-                approved: userChange.approved,
+                state: userChange.state,
                 approvalCount: approvalCount,
-                reviewing: userChange.reviewing,
-                mine: userChange.mine,
                 commentCount: 0,
                 comments: [],
                 reviewers: []
@@ -352,11 +326,11 @@
 
         var changeId = userChange.$id;
 
-        if (!userChange.approved) {
+        if (userChange.state !== 'approved') {
           var approvalsUserRef = $firebase(rootRef.child('/changes/' + changeId + '/approvals/' + userId));
           promises.push(approvalsUserRef.$set(true));          
           var userChangeRef = $firebase(rootRef.child('/users/' + userId + '/changes/' + changeId));
-          promises.push(userChangeRef.$update({approved: true}));
+          promises.push(userChangeRef.$update({state: 'approved'}));
         }
       });
 
@@ -374,18 +348,10 @@
 
       allChangesList.push(loadingItem);
 
-      if (userChange.approved) {
-        approvedChangesList.push(loadingItem);
-      }
-      else {
-        unapprovedChangesList.push(loadingItem);
-      }
-
-      if (userChange.reviewing) {
+      if (userChange.state === 'reviewing') {
         reviewChangesList.push(loadingItem);
       }
-
-      if (userChange.mine) {
+      else if (userChange.state === 'mine') {
         myChangesList.push(loadingItem);
       }
 
@@ -406,15 +372,11 @@
 
         if (!(userChange.$id in itemsCache) && loaded < count) {
 
-          if (!userChange.approved && list === 'unapproved') {
+          if (userChange.state === 'reviewing' && list === 'review') {
             loaded++;
             loadListItem(userChange);
           }
-          else if (userChange.reviewing && list === 'review') {
-            loaded++;
-            loadListItem(userChange);
-          }
-          else if(userChange.mine && list === 'mine') {
+          else if (userChange.state === 'mine' && list === 'mine') {
             loaded++;
             loadListItem(userChange);
           }
@@ -498,12 +460,6 @@
       },
       getAllChangesList: function() {
         return allChangesList;
-      },
-      getApprovedChangesList: function() {
-        return approvedChangesList;
-      },
-      getUnapprovedChangesList: function() {
-        return unapprovedChangesList;
       },
       getReviewChangesList: function() {
         return reviewChangesList;
