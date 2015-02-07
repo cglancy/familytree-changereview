@@ -10,7 +10,7 @@
       });
     })
     .controller('HomeController', function ($scope, $rootScope, fsCurrentUserCache, 
-      ftrFindPersons, ftrPollingForChanges, ftrFeedLists, ftrChangeUtils, ftrReviewerList) {
+      ftrFindPersons, ftrPollingForChanges, ftrFeedLists, ftrChangeUtils, ftrReviewerList, $sce) {
 
       fsCurrentUserCache.getUser().then(function(user) {
         $scope.userDisplayName = user.displayName;
@@ -30,6 +30,11 @@
       
       $scope.loadMore = function() {
         ftrFeedLists.loadList();
+      };
+
+      $scope.renderHtml = function(html)
+      {
+        return $sce.trustAsHtml(html);
       };
 
       ftrReviewerList.getList().then(function(list) {

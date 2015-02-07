@@ -1,7 +1,8 @@
 (function(){
   'use strict';
   angular.module('fsReferenceClientShared')
-  .factory('ftrFeedLists', function (_, $q, $interval, fsApi, fsCurrentUserCache, ftrPersonsCache, ftrPersonChangesCache, ftrLocation, fsChangeUtils, $window, $firebase, FIREBASE_URL) {
+  .factory('ftrFeedLists', function (_, $q, $interval, fsApi, fsCurrentUserCache, ftrPersonsCache, ftrPersonChangesCache, 
+    ftrLocation, fsChangeUtils, $window, $firebase, FIREBASE_URL, ftrChangeDetails) {
 
     var rootRef = new $window.Firebase(FIREBASE_URL);
     var userId;
@@ -267,6 +268,8 @@
                 approvalCount++;
               });
 
+              var html = ftrChangeDetails.getChangeHtml(change);
+
               var viewItem = {
                 id: change.id,
                 loaded: true,
@@ -279,6 +282,7 @@
                 agentName: agentName,
                 agentId: agentId,
                 agentUrl: userUrl,
+                html: html,
                 updatedDate: updatedDate,
                 reason: reason,
                 state: userChange.state,

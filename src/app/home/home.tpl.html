@@ -31,6 +31,7 @@
 				<div class="panel-body">	
 					<div class="row" ng-show="change.loaded">
 						<div class="col-md-8">
+							<div ng-bind-html="renderHtml(change.html)"></div>
 							<p>Reason: {{change.reason}}</p>
 						</div>
 						<div class="col-md-4">
