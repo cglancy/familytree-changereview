@@ -496,8 +496,8 @@
       getMyChangesList: function() {
         return myChangesList;
       },
-      loadList: function(list, count) {
-        _loadList(list, count);
+      loadList: function() {
+        _loadList(currentListType, 5);
       },      
       getSubjectList: function(subjectId) {
         subjectIdFilter = subjectId;

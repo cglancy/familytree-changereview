@@ -29,11 +29,8 @@
       };
       
       $scope.loadMore = function() {
-        console.log('loadMore');
-        ftrFeedLists.loadList($scope.filterType, 5);
+        ftrFeedLists.loadList();
       };
-
-      $scope.setFilter($scope.filterType);
 
       ftrReviewerList.getList().then(function(list) {
         $scope.reviewerList = list;
