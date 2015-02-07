@@ -78,21 +78,7 @@
         change.reviewerText = '';
       };
 
-      $scope.requestReview = function(change, requestState) {
-        ftrChangeUtils.requestReview($scope.userId, change.id, requestState);
-      };
-
-      $scope.pendingChanges = false;
-
-      ftrPollingForChanges.startPolling();
-
-      $rootScope.$on('personChanged', function() {
-        console.log('personChanged');
-        $scope.pendingChanges = true;
-      });
-
-      $scope.getPendingChanges = function() {
-        $scope.pendingChanges = false;
+      $scope.checkForChanges = function() {
         var personIds = ftrPollingForChanges.getChangedPersonIds();
         fsCurrentUserCache.getUser().then(function(user) {
           angular.forEach(personIds, function(id) {
@@ -101,11 +87,6 @@
           });
         });
       };
-
-      $scope.$on('$destroy', function() {
-        // Make sure that the interval is destroyed too
-        ftrPollingForChanges.stopPolling();
-      });
 
     });
 })();
