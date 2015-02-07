@@ -1,9 +1,9 @@
 <div class="row">
 	<div class="col-md-3">
 		<div class="btn-group-vertical filter-buttons" role="group" aria-label="...">
-				<button type="button" class="btn btn-default" ng-class="{active:filterType==='review'}" ng-click="setFilter('review')">My Reviews <span class="badge">{{countTotals.reviewing}}</span></button>
-				<button type="button" class="btn btn-default" ng-class="{active:filterType==='mine'}" ng-click="setFilter('mine')">My Changes <span class="badge">{{countTotals.mine}}</span></button>
-				<button type="button" class="btn btn-default" ng-class="{active:filterType==='all'}" ng-click="setFilter('all')">All Changes <span class="badge">{{countTotals.all}}</span></button>
+				<button type="button" class="btn btn-default" ng-class="{active:currentListType==='review'}" ng-click="setFilter('review')">My Reviews <span class="badge">{{countTotals.reviewing}}</span></button>
+				<button type="button" class="btn btn-default" ng-class="{active:currentListType==='mine'}" ng-click="setFilter('mine')">My Changes <span class="badge">{{countTotals.mine}}</span></button>
+				<button type="button" class="btn btn-default" ng-class="{active:currentListType==='all'}" ng-click="setFilter('all')">All Changes <span class="badge">{{countTotals.all}}</span></button>
 		</div>
 	</div>
 	<div class="col-md-9">

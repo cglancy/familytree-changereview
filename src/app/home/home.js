@@ -17,29 +17,14 @@
         $scope.userId = user.treeUserId;
       });
 
-      $scope.filterType = 'review';
-      $scope.changes = [];
-
       $scope.countTotals = ftrFeedLists.getCountTotals();
-      $scope.allChangesList = ftrFeedLists.getAllChangesList();
-      $scope.reviewChangesList = ftrFeedLists.getReviewChangesList();
-      $scope.myChangesList = ftrFeedLists.getMyChangesList();
+      $scope.currentListType = ftrFeedLists.getCurrentListType();
+      $scope.changes = ftrFeedLists.getCurrentList();
 
       $scope.setFilter = function(filterType) {
-        $scope.filterType = filterType;
-
-        switch(filterType) {
-          case 'review':
-            $scope.changes = $scope.reviewChangesList;
-            break;
-          case 'mine':
-            $scope.changes = $scope.myChangesList;
-            break;
-          case 'all':
-            $scope.changes = $scope.allChangesList;
-            break;
-        }
-
+        ftrFeedLists.setCurrentListType(filterType);
+        $scope.currentListType = ftrFeedLists.getCurrentListType();
+        $scope.changes = ftrFeedLists.getCurrentList();
         $scope.loadMore();
       };
       

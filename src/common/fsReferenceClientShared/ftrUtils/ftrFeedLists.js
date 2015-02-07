@@ -8,6 +8,7 @@
     var userChanges;
     var subjectIdFilter;
     var userIdFilter;
+    var currentListType = 'review';
 
     var itemsCache = {};
     var allChangesList = [];
@@ -47,7 +48,7 @@
         debugCheckOrder();
 
         updateCounts();
-        _loadList('all', 10);
+        _loadList(currentListType, 10);
 
         userChanges.$watch(function(event) {
           
@@ -454,7 +455,35 @@
     }
 
     return {
-
+      setCurrentListType: function(listType) {
+        if (listType === 'review' || 
+            listType === 'mine' || 
+            listType === 'all') {
+          currentListType = listType;
+        }
+        else {
+          console.log('Error: Unknown list type = ' + listType);
+        }
+      },
+      getCurrentListType: function() {
+        return currentListType;
+      },
+      getCurrentList: function() {
+        var list = [];
+        switch(currentListType) {
+          default:
+          case 'review':
+            list = reviewChangesList;
+            break;
+          case 'mine':
+            list = myChangesList;
+            break;
+          case 'all':
+            list = allChangesList;
+            break;
+        }
+        return list;
+      },
       getCountTotals: function() {
         return countTotals;
       },
