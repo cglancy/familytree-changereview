@@ -292,11 +292,12 @@
                 reviewers: []
               };
 
-              angular.forEach(globalChange.comments, function(comment) {
+              angular.forEach(globalChange.comments, function(comment, key) {
 
                 viewItem.commentCount++;
 
                 var commentObj = {
+                  id: key,
                   userId: comment.userId,
                   by: comment.by,
                   text: comment.text,

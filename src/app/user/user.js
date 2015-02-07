@@ -16,15 +16,21 @@
         }
       });
     })
-    .controller('UserController', function ($scope, $stateParams, user, ftrFeedLists, ftrChangeUtils) {
+    .controller('UserController', function ($scope, $stateParams, user, ftrFeedLists, ftrChangeUtils, $sce, 
+      ftrCheckForChanges, ftrFindPersons, ftrAgentUtils) {
 
       $scope.user = user;
+      $scope.userId = user.treeUserId;
+      $scope.userDisplayName = ftrAgentUtils.getAgentName(user);
 
       $scope.loadMore = function() {
         ftrFeedLists.loadSubjectOrUserList(20);
       };
 
-      console.log('user id = ' + $stateParams.userId);
+      $scope.renderHtml = function(html) {
+        return $sce.trustAsHtml(html);
+      };
+
       $scope.changes = ftrFeedLists.getUserList($stateParams.userId);
       $scope.loadMore();
 
@@ -37,8 +43,19 @@
         change.commentText = '';
       };
 
-      $scope.requestReview = function(change, requestState) {
-        ftrChangeUtils.requestReview($scope.userId, change.id, requestState);
+      $scope.addReviewer = function(change, reviewer) {
+        ftrChangeUtils.addReviewer($scope.userId, change, reviewer);
+        change.reviewerText = '';
+      };
+
+      $scope.checkForChanges = function() {
+        ftrCheckForChanges.getChangedPersonIds($scope.userId).then(function(personIds) {
+          console.log('change count = ' + personIds.length);
+          angular.forEach(personIds, function(id) {
+            console.log('updating person = ' + id);
+            ftrFindPersons.updatePerson($scope.userId, id);
+          });
+        });
       };  
     });
 })();

@@ -17,7 +17,7 @@
       });
     })
     .controller('PersonController', function ($scope, $stateParams, person, ftrFeedLists, ftrChangeUtils,
-     fsCurrentUserCache, FS_URL) {
+     fsCurrentUserCache, FS_URL, $sce, ftrCheckForChanges, ftrFindPersons) {
 
       $scope.person = person;
       $scope.personUrl = FS_URL + '/tree/#view=ancestor&person=' + $stateParams.personId;
@@ -29,6 +29,10 @@
 
       $scope.loadMore = function() {
         ftrFeedLists.loadSubjectOrUserList(20);
+      };
+
+      $scope.renderHtml = function(html) {
+        return $sce.trustAsHtml(html);
       };
 
       $scope.changes = ftrFeedLists.getSubjectList($stateParams.personId);
@@ -43,8 +47,19 @@
         change.commentText = '';
       };
 
-      $scope.requestReview = function(change, requestState) {
-        ftrChangeUtils.requestReview($scope.userId, change.id, requestState);
-      };    
+      $scope.addReviewer = function(change, reviewer) {
+        ftrChangeUtils.addReviewer($scope.userId, change, reviewer);
+        change.reviewerText = '';
+      };
+
+      $scope.checkForChanges = function() {
+        ftrCheckForChanges.getChangedPersonIds($scope.userId).then(function(personIds) {
+          console.log('change count = ' + personIds.length);
+          angular.forEach(personIds, function(id) {
+            console.log('updating person = ' + id);
+            ftrFindPersons.updatePerson($scope.userId, id);
+          });
+        });
+      };  
     });
 })();

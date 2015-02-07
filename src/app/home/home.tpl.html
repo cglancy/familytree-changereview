@@ -1,14 +1,14 @@
 <div class="row">
 	<div class="col-md-3">
 		<div class="btn-group-vertical filter-buttons" role="group" aria-label="...">
-				<button type="button" class="btn btn-default" ng-class="{active:currentListType==='review'}" ng-click="setFilter('review')">My Reviews <span class="badge">{{countTotals.reviewing}}</span></button>
-				<button type="button" class="btn btn-default" ng-class="{active:currentListType==='mine'}" ng-click="setFilter('mine')">My Changes <span class="badge">{{countTotals.mine}}</span></button>
-				<button type="button" class="btn btn-default" ng-class="{active:currentListType==='all'}" ng-click="setFilter('all')">All Changes <span class="badge">{{countTotals.all}}</span></button>
+				<button type="button" class="btn btn-primary" ng-class="{active:currentListType==='review'}" ng-click="setFilter('review')">My Reviews <span class="badge">{{countTotals.reviewing}}</span></button>
+				<button type="button" class="btn btn-primary" ng-class="{active:currentListType==='mine'}" ng-click="setFilter('mine')">My Changes <span class="badge">{{countTotals.mine}}</span></button>
+				<button type="button" class="btn btn-primary" ng-class="{active:currentListType==='all'}" ng-click="setFilter('all')">All Changes <span class="badge">{{countTotals.all}}</span></button>
 		</div>
 	</div>
 	<div class="col-md-9">
 		<div class="text-center btn-toolbar filter-buttons">
-			<button type="button" class="btn btn-default" ng-click="checkForChanges()"><span class="glyphicon glyphicon-refresh" aria-hidden="true"></span> Check for Family Tree Changes</button>
+			<button type="button" class="btn btn-primary" ng-click="checkForChanges()"><span class="glyphicon glyphicon-refresh" aria-hidden="true"></span> Check for Family Tree Changes</button>
 		</div>
 		<div infinite-scroll="loadMore()" infinite-scroll-distance="2" infinite-scroll-disabled="scrollDisabled">
 			<div ng-repeat="change in changes track by change.id" class="panel panel-default panel-default">
@@ -53,7 +53,9 @@
 				</div>
 				<div class="panel-footer">
 					<ul class="list-group">
-						<li ng-repeat="comment in change.comments" class="list-group-item"><strong>{{comment.by}}:</strong> {{comment.text}}</li>
+						<li ng-repeat="comment in change.comments" class="list-group-item">
+							<span class="glyphicon glyphicon-remove pull-right" aria-hidden="true" ng-show="comment.userId === userId" ng-click="deleteComment(comment.id)" tooltip="Delete"></span>
+							<strong>{{comment.by}}:</strong> {{comment.text}}</li>
 					</ul>				    
 					<div class="input-group">
 				    	<input type="text" class="form-control" placeholder="Add comment..." ng-model="change.commentText">
