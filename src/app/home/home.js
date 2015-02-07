@@ -67,14 +67,8 @@
         change.commentText = '';
       };
 
-      $scope.onReviewerSelect = function(change, reviewer) {
-        console.log('onReviewerSelect', reviewer);
+      $scope.addReviewer = function(change, reviewer) {
         ftrChangeUtils.addReviewer($scope.userId, change, reviewer);
-
-        if (reviewer) {
-          change.reviewers.push(reviewer);
-        }
-
         change.reviewerText = '';
       };
 
