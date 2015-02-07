@@ -15,6 +15,25 @@
         return deferred.promise;
       }
 
+      function getAgentName(agent) {
+        var name = '';
+        if (agent.names.length === 2) {
+          name = agent.names[0].value + ' ' + agent.names[1].value;
+        }
+        else {
+          name = agent.$getName();
+        }
+
+        if (!name) {
+          name = agent.$getAccountName();
+          if (!name) {
+            name = agent.id;
+          }
+        }
+
+        return name;
+      }
+
       function getAgentData(userId, users) {
         var deferred = $q.defer();
         var promises = [];
@@ -23,18 +42,13 @@
         angular.forEach(users, function(user, key) {
           if (userId !== key) {
             promises.push(ftrAgentsCache.getAgent(key).then(function(agent) {
-              var name = agent.$getName();
-              if (!name) {
-                name = agent.$getAccountName();
-                if (!name) {
-                  name = key;
-                }
-              }
+
+              var name = getAgentName(agent);
               var email = agent.$getEmail();
               if (!email) {
                 email = '';
               }
-              list.push({userId: key, name: name, email:email});
+              list.push({id: key, name: name, email:email});
             }));
           }
         });

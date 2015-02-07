@@ -51,14 +51,8 @@
       $scope.setFilter($scope.filterType);
 
       ftrReviewerList.getList().then(function(list) {
-        $scope.reviewerList0 = list;
+        $scope.reviewerList = list;
       });
-
-      $scope.reviewerList = [
-        {userId:0, name:'Erv Bushke', email: 'null@example.com'}, 
-        {userId:1, name:'Elmer Fudd', email: 'null@example.com'},
-        {userId:2, name:'Edwin Moses', email: 'null@example.com'}
-      ];
 
       $scope.approve = function(change, approveState) {
         ftrChangeUtils.approve($scope.userId, change.id, approveState);
@@ -73,11 +67,12 @@
         change.commentText = '';
       };
 
-      $scope.onReviewerSelect = function (change, item) {
-        console.log('onReviewerSelect', item);
+      $scope.onReviewerSelect = function(change, reviewer) {
+        console.log('onReviewerSelect', reviewer);
+        ftrChangeUtils.addReviewer($scope.userId, change, reviewer);
 
-        if (item) {
-          change.reviewers.push(item);
+        if (reviewer) {
+          change.reviewers.push(reviewer);
         }
 
         change.reviewerText = '';

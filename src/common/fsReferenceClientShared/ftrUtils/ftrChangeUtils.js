@@ -86,40 +86,34 @@
         return interested;
       };
 
-      function _touchOtherWatchers(userId, changeId, timestamp) {
-        var changeUsersRef = rootRef.child('/changes/' + changeId + '/users');
-        changeUsersRef.once('value', function(snapshot) {
-          var users = snapshot.val();
-          if (users) {
-            angular.forEach(users, function(user, id) {
-              if (id !== userId) {
-                var userChangeRef = rootRef.child('/users/' + id + '/changes/' + changeId);
+      function _touchOtherWatchers(userId, changeId) {
+        ftrFirebaseUtils.getServerTimestamp().then(function(timestamp) {        
+          var changeUsersRef = rootRef.child('changes').child(changeId).child('users');
+          changeUsersRef.once('value', function(users) {
+            users.forEach(function(user) {
+              if (user.key() !== userId) {
+                var userChangeRef = rootRef.child('/users/' + user.key() + '/changes/' + changeId);
                 userChangeRef.update({updated: timestamp});
                 userChangeRef.setPriority(-timestamp);
               }
             });
-          }
-        });
+          });
 
-        var changeReviewersRef = rootRef.child('/changes/' + changeId + '/reviewers');
-        changeReviewersRef.once('value', function(snapshot) {
-          var users = snapshot.val();
-          if (users) {
-            angular.forEach(users, function(user, id) {
-              if (id !== userId) {
-                var userChangeRef = rootRef.child('/users/' + id + '/changes/' + changeId);
-                userChangeRef.update({updated: timestamp});
-                userChangeRef.setPriority(-timestamp);
-              }
-            });
-          }
-        });      
+          var changeReviewersRef = rootRef.child('/changes/' + changeId + '/reviewers');
+          changeReviewersRef.once('value', function(users) {
+              users.forEach(function(user) {
+                if (user.key() !== userId) {
+                  var userChangeRef = rootRef.child('/users/' + user.key() + '/changes/' + changeId);
+                  userChangeRef.update({updated: timestamp});
+                  userChangeRef.setPriority(-timestamp);
+                }
+              });
+          });
+        });  
       }
 
       factory.touchOtherWatchers = function(userId, changeId) {
-        ftrFirebaseUtils.getServerTimestamp().then(function(timestamp) {
-          _touchOtherWatchers(userId, changeId, timestamp);          
-        });
+        _touchOtherWatchers(userId, changeId);          
       };
 
       factory.approve = function(userId, changeId, approveState) {
@@ -140,7 +134,7 @@
           userChangeRef.$update({state: 'reviewing'});
         }
 
-        _touchOtherWatchers(changeId);
+        _touchOtherWatchers(userId, changeId);
       };
 
       factory.addComment = function(userId, userName, changeId, text) {
@@ -160,27 +154,53 @@
 
           commentsRef.$push(commentObj);
 
+          _touchOtherWatchers(userId, changeId);
           ftrFeedLists.updateItem(changeId);         
-          _touchOtherWatchers(changeId);
         }
       };
 
-      factory.addReviewer = function(changeId, reviewerId) {
-        var reviewersRef = $firebase(rootRef.child('/changes/' + changeId + '/reviewers/' + reviewerId));
-        var userChangeRef = rootRef.child('/users/' + reviewerId + '/changes/' + changeId);
+      factory.addReviewer = function(userId, change, reviewer) {
+        //TODO: handle the case where the selected reviewer has already approved the change.
+        //TODO: disallow the case where the selected reviewer is already watching the change.
 
-        reviewersRef.$set(true);
-        userChangeRef.setWithPriority({updated: '', state: 'reviewing'}, 0);
-        _touchOtherWatchers(changeId);
+        // do not allow the agent that made the change to be a reviewer
+        // this should be filtered out of the pick list        
+        if (change.agentId === reviewer.id) {
+          console.log('The change contributor cannot be a reviewer.');
+          return;
+        }
+
+        var reviewersRef = $firebase(rootRef.child('/changes/' + change.id + '/reviewers/' + reviewer.id));
+        reviewersRef.$set(true);        
+
+        var userChangesRef = rootRef.child('/users/' + reviewer.id + '/changes/');
+        userChangesRef.once('value', function(snapshot) {
+          if (!snapshot.hasChild(change.id)) {
+            userChangesRef.child(change.id).setWithPriority({updated: -change.order, state:'reviewing'}, change.order);
+          }
+          else {
+            console.log('Error: Reviewer already has change in feed.');
+          }
+          
+          ftrFeedLists.updateItem(change.id);
+          _touchOtherWatchers(userId, change.id);
+        });
       };
 
-      factory.removeReviewer = function(changeId, reviewerId) {
-        var reviewersRef = $firebase(rootRef.child('/changes/' + changeId + '/reviewers/' + reviewerId));
-        var userChangeRef = $firebase(rootRef.child('/users/' + reviewerId + '/changes/' + changeId));
-
+      factory.removeReviewer = function(userId, change, reviewer) {
+        var reviewersRef = $firebase(rootRef.child('/changes/' + change.id + '/reviewers/' + reviewer.id));
         reviewersRef.$remove();
-        userChangeRef.$update({state: ''});
-        _touchOtherWatchers(changeId);
+
+        var usersRef = $firebase(rootRef.child('/changes/' + change.id + '/users/'));
+        usersRef.once('value', function(snapshot) {
+          if (!snapshot.hasChild(reviewer.id)) {
+            var userChangeRef = $firebase(rootRef.child('/users/' + reviewer.id + '/changes/' + change.id));
+            userChangeRef.$remove();
+          }
+          
+          ftrFeedLists.updateItem(change.id);
+          _touchOtherWatchers(userId, change.id);
+        });
       };
 
       factory.requestReview = function(userId, changeId, requestState) {
