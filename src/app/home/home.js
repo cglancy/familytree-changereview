@@ -53,8 +53,8 @@
         change.commentText = '';
       };
 
-      $scope.deleteComment = function(commentId) {
-        console.log('deleteComment = ' + commentId);
+      $scope.deleteComment = function(changeId, commentId) {
+        ftrChangeUtils.deleteComment($scope.userId, changeId, commentId);
       };
 
       $scope.addReviewer = function(change, reviewer) {

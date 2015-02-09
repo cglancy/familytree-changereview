@@ -54,7 +54,7 @@
 				<div class="panel-footer">
 					<ul class="list-group">
 						<li ng-repeat="comment in change.comments" class="list-group-item">
-							<span class="glyphicon glyphicon-remove pull-right" aria-hidden="true" ng-show="comment.userId === userId" ng-click="deleteComment(comment.id)" tooltip="Delete"></span>
+							<span class="glyphicon glyphicon-remove pull-right" aria-hidden="true" ng-show="comment.userId === userId" ng-click="deleteComment(change.id, comment.id)"></span>
 							<strong>{{comment.by}}:</strong> {{comment.text}}</li>
 					</ul>				    
 					<div class="input-group">

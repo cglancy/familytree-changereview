@@ -159,6 +159,17 @@
         }
       };
 
+      factory.deleteComment = function(userId, changeId, commentId) {
+
+        console.log('delete comment ' + commentId + ' from change ' + changeId);
+
+          var commentRef = $firebase(rootRef.child('/changes/' + changeId + '/comments/' + commentId));
+          commentRef.$remove();
+
+          _touchOtherWatchers(userId, changeId);
+          ftrFeedLists.updateItem(changeId);         
+      };
+
       factory.addReviewer = function(userId, change, reviewer) {
         //TODO: handle the case where the selected reviewer has already approved the change.
         //TODO: disallow the case where the selected reviewer is already watching the change.
